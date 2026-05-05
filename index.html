@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍔 Fast Food</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #1a1a2e; color: white; padding: 15px; min-height: 100vh; }
+        .header { text-align: center; padding: 20px 0; background: linear-gradient(135deg, #e94560, #0f3460); border-radius: 15px; margin-bottom: 20px; }
+        .header h1 { font-size: 26px; }
+        .header p { font-size: 14px; opacity: 0.8; margin-top: 5px; }
+        .category { font-size: 18px; font-weight: bold; margin: 15px 0 10px; color: #e94560; }
+        .products { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        .product { background: #16213e; border-radius: 15px; padding: 15px; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: all 0.2s; }
+        .product:active { background: #1a2744; transform: scale(0.98); }
+        .product-emoji { width: 60px; height: 60px; background: #0f3460; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 35px; }
+        .product-info { flex: 1; }
+        .product-name { font-size: 16px; font-weight: bold; }
+        .product-price { font-size: 15px; color: #e94560; font-weight: bold; margin-top: 3px; }
+        .add-btn { background: #e94560; color: white; border: none; padding: 8px 16px; border-radius: 10px; font-size: 14px; cursor: pointer; font-weight: bold; }
+        .add-btn:active { background: #c73a52; }
+        .cart-bar { position: fixed; bottom: 20px; left: 15px; right: 15px; background: #e94560; padding: 15px 20px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; box-shadow: 0 4px 20px rgba(233,69,96,0.4); }
+        .cart-bar-text { font-size: 18px; font-weight: bold; }
+        .cart-bar-price { font-size: 16px; }
+        .cart-count { background: white; color: #e94560; padding: 3px 10px; border-radius: 20px; font-weight: bold; }
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 100; padding: 20px; }
+        .modal-content { background: #16213e; border-radius: 20px; padding: 20px; max-height: 80vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header h2 { color: #e94560; }
+        .close-btn { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #0f3460; }
+        .cart-item-name { font-size: 15px; }
+        .cart-item-price { color: #e94560; font-weight: bold; }
+        .cart-item-qty { display: flex; align-items: center; gap: 10px; }
+        .qty-btn { background: #0f3460; color: white; border: none; width: 30px; height: 30px; border-radius: 8px; font-size: 18px; cursor: pointer; }
+        .total-row { display: flex; justify-content: space-between; padding: 15px 0; font-size: 18px; font-weight: bold; }
+        .order-btn { width: 100%; padding: 15px; background: #e94560; color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+        .order-btn:active { background: #c73a52; }
+        .empty-cart { text-align: center; padding: 30px; color: #888; font-size: 16px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>🍔 Fast Food</h1>
+        <p>Buyurtma bepul yetkazib beriladi</p>
+    </div>
+
+    <div class="category">🔥 LAVASH</div>
+    <div class="products" id="lavash-products"></div>
+
+    <div class="category">🍔 BURGER</div>
+    <div class="products" id="burger-products"></div>
+
+    <div class="category">🥤 ICHIMLIKLAR</div>
+    <div class="products" id="drinks-products"></div>
+
+    <div style="height: 100px;"></div>
+
+    <div class="cart-bar" onclick="openCart()">
+        <div class="cart-bar-text">🛒 Savat</div>
+        <div>
+            <span class="cart-count" id="cart-count">0</span>
+            <span class="cart-bar-price" id="cart-total">0 so'm</span>
+        </div>
+    </div>
+
+    <div class="modal" id="cart-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🛒 Savat</h2>
+                <button class="close-btn" onclick="closeCart()">✕</button>
+            </div>
+            <div id="cart-items"></div>
+            <div class="total-row">
+                <span>Jami:</span>
+                <span id="modal-total">0 so'm</span>
+            </div>
+            <button class="order-btn" onclick="submitOrder()">📝 Buyurtma berish</button>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        const products = [
+            { id: 1, name: "Lavash mol go'sht", price: 28000, emoji: "🥙", category: "lavash" },
+            { id: 2, name: "Lavash tovuqli", price: 25000, emoji: "🌯", category: "lavash" },
+            { id: 3, name: "Mini lavash", price: 20000, emoji: "🌮", category: "lavash" },
+            { id: 4, name: "Gamburger", price: 22000, emoji: "🍔", category: "burger" },
+            { id: 5, name: "Chizburger", price: 25000, emoji: "🍔", category: "burger" },
+            { id: 6, name: "Big gamburger", price: 30000, emoji: "🍔", category: "burger" },
+            { id: 7, name: "Coca Cola 0.5L", price: 8000, emoji: "🥤", category: "drinks" },
+            { id: 8, name: "Pepsi 0.5L", price: 8000, emoji: "🥤", category: "drinks" },
+            { id: 9, name: "Suv 0.5L", price: 5000, emoji: "💧", category: "drinks" },
+        ];
+
+        let cart = [];
+
+        function renderProducts() {
+            const lavashDiv = document.getElementById('lavash-products');
+            const burgerDiv = document.getElementById('burger-products');
+            const drinksDiv = document.getElementById('drinks-products');
+
+            lavashDiv.innerHTML = '';
+            burgerDiv.innerHTML = '';
+            drinksDiv.innerHTML = '';
+
+            products.forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'product';
+                div.innerHTML = `
+                    <div class="product-emoji">${p.emoji}</div>
+                    <div class="product-info">
+                        <div class="product-name">${p.name}</div>
+                        <div class="product-price">${p.price.toLocaleString()} so'm</div>
+                    </div>
+                    <button class="add-btn" onclick="addToCart(${p.id})">+</button>
+                `;
+
+                if (p.category === 'lavash') lavashDiv.appendChild(div);
+                else if (p.category === 'burger') burgerDiv.appendChild(div);
+                else drinksDiv.appendChild(div);
+            });
+        }
+
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            const existing = cart.find(i => i.id === productId);
+            
+            if (existing) {
+                existing.qty += 1;
+            } else {
+                cart.push({ ...product, qty: 1 });
+            }
+            
+            updateCart();
+            
+            // Kichik tebranish
+            const btn = event.target;
+            btn.style.transform = 'scale(1.2)';
+            setTimeout(() => btn.style.transform = 'scale(1)', 100);
+        }
+
+        function removeFromCart(productId) {
+            const existing = cart.find(i => i.id === productId);
+            if (existing) {
+                existing.qty -= 1;
+                if (existing.qty <= 0) {
+                    cart = cart.filter(i => i.id !== productId);
+                }
+            }
+            updateCart();
+        }
+
+        function updateCart() {
+            const count = cart.reduce((sum, i) => sum + i.qty, 0);
+            const total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+            
+            document.getElementById('cart-count').textContent = count;
+            document.getElementById('cart-total').textContent = total.toLocaleString() + " so'm";
+            document.getElementById('modal-total').textContent = total.toLocaleString() + " so'm";
+            
+            renderCartItems();
+        }
+
+        function renderCartItems() {
+            const itemsDiv = document.getElementById('cart-items');
+            
+            if (cart.length === 0) {
+                itemsDiv.innerHTML = '<div class="empty-cart">🛒 Savat bo\'sh</div>';
+                return;
+            }
+            
+            itemsDiv.innerHTML = cart.map(i => `
+                <div class="cart-item">
+                    <span class="cart-item-name">${i.emoji} ${i.name}</span>
+                    <div class="cart-item-price">${(i.price * i.qty).toLocaleString()} so'm</div>
+                    <div class="cart-item-qty">
+                        <button class="qty-btn" onclick="removeFromCart(${i.id})">-</button>
+                        <span>${i.qty}</span>
+                        <button class="qty-btn" onclick="addToCart(${i.id})">+</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openCart() {
+            document.getElementById('cart-modal').style.display = 'flex';
+        }
+
+        function closeCart() {
+            document.getElementById('cart-modal').style.display = 'none';
+        }
+
+        function submitOrder() {
+            if (cart.length === 0) {
+                tg.showAlert("Savat bo'sh!");
+                return;
+            }
+            
+            const total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+            const items = cart.map(i => `${i.name} x${i.qty}`).join(', ');
+            
+            const orderData = {
+                items: items,
+                total: total,
+                cart: cart
+            };
+            
+            tg.sendData(JSON.stringify(orderData));
+        }
+
+        renderProducts();
+        updateCart();
+    </script>
+</body>
+</html>
