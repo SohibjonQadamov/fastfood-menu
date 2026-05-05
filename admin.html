@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚙️ Admin Panel</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f0f1a; color: white; padding: 15px; min-height: 100vh; }
+        .header { text-align: center; padding: 20px; background: linear-gradient(135deg, #6c5ce7, #a855f7); border-radius: 15px; margin-bottom: 20px; }
+        .header h1 { font-size: 24px; }
+        .header p { font-size: 13px; opacity: 0.8; margin-top: 5px; }
+        .card { background: #1a1a2e; border-radius: 15px; padding: 20px; margin-bottom: 15px; }
+        .card h3 { color: #a855f7; margin-bottom: 15px; font-size: 18px; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 13px; color: #aaa; margin-bottom: 5px; }
+        .input-group input, .input-group select { width: 100%; padding: 12px; background: #0f0f1a; border: 1px solid #333; border-radius: 10px; color: white; font-size: 15px; }
+        .input-group input:focus { border-color: #a855f7; outline: none; }
+        .btn { width: 100%; padding: 14px; background: #a855f7; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
+        .btn:active { background: #7c3aed; }
+        .btn-red { background: #e94560; }
+        .btn-red:active { background: #c73a52; }
+        .btn-green { background: #10b981; }
+        .btn-green:active { background: #059669; }
+        .product-list { display: flex; flex-direction: column; gap: 10px; }
+        .product-item { background: #0f0f1a; border-radius: 10px; padding: 12px; display: flex; align-items: center; gap: 12px; }
+        .product-item img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; }
+        .product-item-info { flex: 1; }
+        .product-item-name { font-weight: bold; font-size: 14px; }
+        .product-item-price { color: #10b981; font-size: 13px; }
+        .product-item-del { background: #e94560; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; }
+        .tab-bar { display: flex; gap: 10px; margin-bottom: 15px; }
+        .tab { flex: 1; padding: 12px; background: #1a1a2e; border: none; border-radius: 10px; color: white; font-size: 14px; cursor: pointer; text-align: center; }
+        .tab.active { background: #a855f7; }
+        .hidden { display: none; }
+        .message { padding: 12px; border-radius: 10px; margin-bottom: 15px; font-size: 14px; text-align: center; }
+        .message-success { background: #05966933; color: #10b981; }
+        .message-error { background: #e9456033; color: #e94560; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>⚙️ Admin Panel</h1>
+        <p>Mahsulotlarni boshqarish</p>
+    </div>
+
+    <div class="tab-bar">
+        <button class="tab active" onclick="showTab('list')">📋 Mahsulotlar</button>
+        <button class="tab" onclick="showTab('add')">➕ Qo'shish</button>
+    </div>
+
+    <!-- Mahsulotlar ro'yxati -->
+    <div id="tab-list">
+        <div class="card">
+            <h3>📋 Barcha mahsulotlar</h3>
+            <div class="product-list" id="productList">
+                <p style="color:#aaa;">Yuklanmoqda...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mahsulot qo'shish -->
+    <div id="tab-add" class="hidden">
+        <div class="card">
+            <h3>➕ Yangi mahsulot</h3>
+            <div class="input-group">
+                <label>Mahsulot nomi</label>
+                <input type="text" id="prodName" placeholder="Masalan: Lavash mol go'sht">
+            </div>
+            <div class="input-group">
+                <label>Narxi (so'm)</label>
+                <input type="number" id="prodPrice" placeholder="28000">
+            </div>
+            <div class="input-group">
+                <label>Kategoriya</label>
+                <select id="prodCategory">
+                    <option value="lavash">🔥 Lavash</option>
+                    <option value="burger">🍔 Burger</option>
+                    <option value="hotdog">🌭 Hot-Dog</option>
+                    <option value="ichimlik">🥤 Ichimlik</option>
+                    <option value="gazak">🍟 Gazak</option>
+                    <option value="shirinlik">🍰 Shirinlik</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Rasm (ixtiyoriy)</label>
+                <input type="file" id="prodImage" accept="image/*">
+            </div>
+            <div id="messageBox"></div>
+            <button class="btn" onclick="addProduct()">✅ Qo'shish</button>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        
+        // Default mahsulotlar
+        let products = [
+            { id: 1, name: "Lavash mol go'sht", price: 28000, emoji: "🥙", category: "lavash" },
+            { id: 2, name: "Gamburger", price: 22000, emoji: "🍔", category: "burger" },
+            { id: 3, name: "Cola 0.5L", price: 8000, emoji: "🥤", category: "ichimlik" },
+        ];
+
+        function showTab(tab) {
+            document.getElementById('tab-list').classList.add('hidden');
+            document.getElementById('tab-add').classList.add('hidden');
+            document.getElementById(`tab-${tab}`).classList.remove('hidden');
+            
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (tab === 'list') renderProducts();
+        }
+
+        function renderProducts() {
+            const container = document.getElementById('productList');
+            if (products.length === 0) {
+                container.innerHTML = '<p style="color:#aaa;">Hozircha mahsulotlar yo\'q</p>';
+                return;
+            }
+            container.innerHTML = products.map(p => `
+                <div class="product-item">
+                    <div style="width:50px;height:50px;background:#1a1a2e;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:25px;">${p.emoji}</div>
+                    <div class="product-item-info">
+                        <div class="product-item-name">${p.name}</div>
+                        <div class="product-item-price">${p.price.toLocaleString()} so'm | ${p.category}</div>
+                    </div>
+                    <button class="product-item-del" onclick="deleteProduct(${p.id})">🗑</button>
+                </div>
+            `).join('');
+        }
+
+        function addProduct() {
+            const name = document.getElementById('prodName').value.trim();
+            const price = parseInt(document.getElementById('prodPrice').value);
+            const category = document.getElementById('prodCategory').value;
+            
+            if (!name || !price) {
+                showMessage('Iltimos, barcha maydonlarni to\'ldiring!', 'error');
+                return;
+            }
+            
+            const emojiMap = { 'lavash': '🥙', 'burger': '🍔', 'hotdog': '🌭', 'ichimlik': '🥤', 'gazak': '🍟', 'shirinlik': '🍰' };
+            const emoji = emojiMap[category] || '🍔';
+            
+            const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+            products.push({ id: newId, name, price, emoji, category });
+            
+            document.getElementById('prodName').value = '';
+            document.getElementById('prodPrice').value = '';
+            showMessage(`✅ ${emoji} ${name} qo'shildi!`, 'success');
+            renderProducts();
+        }
+
+        function deleteProduct(id) {
+            if (confirm('Haqiqatan ham o\'chirmoqchimisiz?')) {
+                products = products.filter(p => p.id !== id);
+                renderProducts();
+                showMessage('🗑 O\'chirildi', 'success');
+            }
+        }
+
+        function showMessage(text, type) {
+            const box = document.getElementById('messageBox');
+            box.innerHTML = `<div class="message message-${type}">${text}</div>`;
+            setTimeout(() => box.innerHTML = '', 3000);
+        }
+
+        // Boshlang'ich yuklash
+        renderProducts();
+    </script>
+</body>
+</html>
