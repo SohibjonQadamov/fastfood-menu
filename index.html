@@ -7,511 +7,300 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --yellow: #FFD700;
-            --red: #FF4757;
-            --green: #2ED573;
-            --bg: #F8F9FA;
-            --card: #FFFFFF;
-            --text: #1E1E1E;
-            --gray: #8E8E93;
-            --radius: 16px;
-            --shadow: 0 2px 12px rgba(0,0,0,0.06);
+            --yellow: #FFD700; --red: #FF4757; --green: #2ED573;
+            --bg: #F2F2F7; --card: #FFFFFF; --text: #1C1C1E;
+            --gray: #8E8E93; --radius: 16px; --shadow: 0 1px 3px rgba(0,0,0,0.08);
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 80px; -webkit-tap-highlight-color: transparent; }
         
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            padding-bottom: 80px;
-        }
+        .page { display: none; }
+        .page.active { display: block; }
+        .hidden { display: none !important; }
 
         /* HEADER */
-        .main-header {
-            background: var(--yellow);
-            padding: 12px 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .main-header h1 { font-size: 20px; font-weight: 800; }
-        .header-btn { background: none; border: none; font-size: 24px; cursor: pointer; padding: 4px; }
-        .header-btn.profile-avatar { width: 36px; height: 36px; border-radius: 50%; overflow: hidden; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-        .header-btn.profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .header { background: var(--yellow); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+        .header h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+        .header-avatar { width: 36px; height: 36px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; font-size: 18px; overflow: hidden; cursor: pointer; border: none; }
+        .header-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
         /* STORE HEADER */
-        .store-header {
-            background: white;
-            padding: 12px 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            border-bottom: 1px solid #eee;
-        }
-        .back-btn { background: none; border: none; font-size: 24px; cursor: pointer; }
-        .store-title { font-weight: 700; font-size: 17px; }
+        .store-header { background: white; padding: 12px 16px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100; }
+        .back-btn { background: none; border: none; font-size: 24px; cursor: pointer; padding: 4px; }
+        .store-header-title { font-weight: 700; font-size: 17px; }
 
-        /* SEARCH */
-        .search-container { padding: 8px 16px 12px; }
-        .search-input {
-            width: 100%;
-            padding: 12px 16px 12px 40px;
-            border: none;
-            border-radius: 12px;
-            background: white;
-            font-size: 15px;
-            box-shadow: var(--shadow);
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="%238E8E93" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>');
-            background-repeat: no-repeat;
-            background-position: 12px center;
-        }
-        .search-results {
-            display: none;
-            background: white;
-            border-radius: 12px;
-            margin: 8px 16px 0;
-            padding: 4px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            max-height: 320px;
-            overflow-y: auto;
-            position: absolute;
-            left: 0;
-            right: 0;
-            z-index: 200;
-        }
-        .search-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 12px;
-            cursor: pointer;
-            border-radius: 8px;
-        }
-        .search-item:hover { background: #f5f5f5; }
-        .search-emoji { font-size: 28px; }
-        .search-info { flex: 1; }
+        /* SEARCH - faqat home sahifada */
+        .search-box { padding: 8px 16px 4px; }
+        .search-input { width: 100%; padding: 12px 40px; border: none; border-radius: 12px; background: #E8E8ED; font-size: 15px; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="%238E8E93" stroke-width="2.5"><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>'); background-repeat: no-repeat; background-position: 12px center; }
+        .search-results { display: none; position: absolute; left: 16px; right: 16px; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); max-height: 300px; overflow-y: auto; z-index: 200; margin-top: 4px; }
+        .search-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; }
+        .search-item:active { background: #f0f0f0; }
+        .search-emoji { font-size: 24px; }
         .search-name { font-weight: 600; font-size: 14px; }
         .search-sub { font-size: 12px; color: var(--gray); }
 
-        /* SECTION */
-        .section { padding: 0 16px 20px; }
-        .section-title { font-size: 20px; font-weight: 700; padding: 8px 0 12px; }
-
-        /* STORE CARDS */
-        .stores-row {
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-            padding-bottom: 8px;
-        }
+        /* SECTIONS */
+        .section-title { font-size: 20px; font-weight: 700; padding: 16px 16px 8px; }
+        .stores-row { display: flex; gap: 12px; overflow-x: auto; padding: 0 16px 8px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
         .stores-row::-webkit-scrollbar { display: none; }
-        .store-card {
-            min-width: 140px;
-            background: var(--card);
-            border-radius: var(--radius);
-            padding: 16px 14px;
-            text-align: center;
-            box-shadow: var(--shadow);
-            cursor: pointer;
-            transition: 0.2s;
-            scroll-snap-align: start;
-        }
-        .store-card:active { transform: scale(0.96); }
-        .store-icon { font-size: 40px; margin-bottom: 8px; }
-        .store-name { font-size: 14px; font-weight: 600; }
-        .store-meta { font-size: 11px; color: var(--gray); margin-top: 4px; }
+        .store-card { min-width: 135px; background: var(--card); border-radius: var(--radius); padding: 14px 12px; text-align: center; box-shadow: var(--shadow); cursor: pointer; scroll-snap-align: start; transition: .15s; }
+        .store-card:active { transform: scale(.96); }
+        .store-icon { font-size: 36px; }
+        .store-name { font-size: 13px; font-weight: 600; margin-top: 6px; }
+        .store-meta { font-size: 11px; color: var(--gray); margin-top: 2px; }
 
-        /* DISCOUNT */
-        .discount-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .discount-card {
-            background: var(--card);
-            border-radius: var(--radius);
-            overflow: hidden;
-            box-shadow: var(--shadow);
-            cursor: pointer;
-        }
-        .discount-img {
-            height: 90px;
-            background: linear-gradient(135deg, #FF6B6B, #FF4757);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 45px;
-        }
+        /* DISCOUNTS */
+        .discount-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px; }
+        .discount-card { background: var(--card); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); cursor: pointer; }
+        .discount-img { height: 80px; background: linear-gradient(135deg, #FF6B6B, #FF4757); display: flex; align-items: center; justify-content: center; font-size: 40px; }
         .discount-body { padding: 10px 12px; }
-        .discount-name { font-size: 13px; font-weight: 600; }
-        .discount-price { font-size: 16px; font-weight: 700; color: var(--red); }
-        .discount-old { font-size: 11px; color: var(--gray); text-decoration: line-through; margin-left: 4px; }
-        .discount-badge { background: var(--red); color: white; font-size: 10px; padding: 2px 8px; border-radius: 10px; }
+        .discount-name { font-size: 12px; font-weight: 600; }
+        .discount-price { font-size: 15px; font-weight: 700; color: var(--red); }
+        .discount-old { font-size: 10px; color: var(--gray); text-decoration: line-through; margin-left: 4px; }
+        .discount-badge { background: var(--red); color: white; font-size: 9px; padding: 2px 6px; border-radius: 8px; display: inline-block; margin-top: 2px; }
 
-        /* PRODUCT */
-        .category-title { font-size: 16px; font-weight: 700; margin: 16px 0 8px; padding: 0 16px; }
-        .product-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: white;
-            margin: 4px 16px;
-            padding: 12px;
-            border-radius: 12px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.03);
-        }
-        .product-img { font-size: 35px; width: 50px; text-align: center; }
+        /* PRODUCTS */
+        .cat-title { font-size: 16px; font-weight: 700; padding: 16px 16px 6px; }
+        .product-item { display: flex; align-items: center; gap: 10px; margin: 2px 16px; padding: 10px 12px; background: white; border-radius: 10px; }
+        .product-emoji { font-size: 30px; width: 45px; text-align: center; }
         .product-info { flex: 1; }
         .product-name { font-size: 14px; font-weight: 600; }
-        .product-price { font-size: 15px; font-weight: 700; color: var(--text); margin-top: 2px; }
-        .product-add {
-            width: 36px; height: 36px;
-            background: var(--yellow);
-            border: none;
-            border-radius: 10px;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-        }
+        .product-price { font-size: 14px; font-weight: 700; }
+        .add-btn { width: 32px; height: 32px; background: var(--yellow); border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; }
 
         /* PROFILE */
-        .profile-card {
-            text-align: center;
-            padding: 30px 20px;
-            background: white;
-            margin: 16px;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-        }
-        .profile-avatar { font-size: 70px; margin-bottom: 10px; }
+        .profile-card { background: white; margin: 16px; border-radius: var(--radius); padding: 24px; text-align: center; box-shadow: var(--shadow); }
+        .profile-avatar { font-size: 70px; }
         .profile-avatar img { width: 80px; height: 80px; border-radius: 50%; }
-        .profile-name { font-size: 20px; font-weight: 700; }
-        .profile-username { color: var(--gray); margin: 4px 0; }
-        .profile-id { color: var(--gray); font-size: 12px; }
+        .profile-name { font-size: 20px; font-weight: 700; margin-top: 8px; }
+        .profile-username { color: var(--gray); }
+        .profile-id { color: var(--gray); font-size: 11px; margin-top: 2px; }
 
         /* BOTTOM NAV */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: white;
-            display: flex;
-            justify-content: space-around;
-            padding: 8px 0 20px;
-            border-top: 1px solid #eee;
-            z-index: 100;
-        }
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-            font-size: 10px;
-            color: var(--gray);
-            cursor: pointer;
-            border: none;
-            background: none;
-            padding: 4px 12px;
-        }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 8px 0 20px; border-top: 1px solid #E5E5EA; z-index: 100; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10px; color: var(--gray); cursor: pointer; border: none; background: none; padding: 4px 12px; }
         .nav-item.active { color: var(--text); }
-        .nav-icon { font-size: 22px; }
-        .cart-badge {
-            background: var(--red);
-            color: white;
-            font-size: 10px;
-            padding: 2px 7px;
-            border-radius: 10px;
-            position: absolute;
-            top: -2px;
-            right: 4px;
-        }
+        .nav-icon { font-size: 22px; position: relative; }
+        .cart-badge { background: var(--red); color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; position: absolute; top: -6px; right: -8px; display: none; }
 
-        /* CART OVERLAY */
-        .cart-overlay {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: white;
-            border-radius: 20px 20px 0 0;
-            padding: 20px;
-            z-index: 200;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
-            max-height: 60vh;
-            overflow-y: auto;
-        }
-        .cart-item-row { display: flex; justify-content: space-between; padding: 10px 0; }
-        .order-btn {
-            width: 100%;
-            padding: 16px;
-            background: var(--yellow);
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            margin-top: 12px;
-        }
-
-        .hidden { display: none !important; }
-        .page { display: none; }
-        .page.active { display: block; }
+        /* CART */
+        .cart-overlay { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-radius: 20px 20px 0 0; padding: 20px; z-index: 200; box-shadow: 0 -4px 20px rgba(0,0,0,0.15); max-height: 55vh; overflow-y: auto; }
+        .cart-row { display: flex; justify-content: space-between; padding: 8px 0; }
+        .order-btn { width: 100%; padding: 14px; background: var(--yellow); border: none; border-radius: 12px; font-size: 16px; font-weight: 700; margin-top: 12px; cursor: pointer; }
         .relative { position: relative; }
     </style>
 </head>
 <body>
 
-    <!-- MAIN HEADER -->
-    <div class="main-header" id="mainHeader">
-        <h1>🍔 Fast Food</h1>
-        <button class="header-btn profile-avatar" onclick="showPage('profile')" id="headerAvatar">👤</button>
+<!-- HOME HEADER -->
+<div class="header" id="mainHeader">
+    <h1>🍔 Fast Food</h1>
+    <button class="header-avatar" id="headerAvatar" onclick="showPage('profile')">👤</button>
+</div>
+
+<!-- STORE HEADER -->
+<div class="store-header hidden" id="storeHeader">
+    <button class="back-btn" onclick="showPage('home')">←</button>
+    <span class="store-header-title" id="storeTitle"></span>
+</div>
+
+<!-- HOME PAGE -->
+<div class="page active" id="page-home">
+    <div class="search-box relative">
+        <input type="text" class="search-input" id="searchInput" placeholder="Qidirish..." oninput="doSearch(this.value)">
+        <div class="search-results" id="searchResults"></div>
     </div>
+    <div class="section-title">🏪 Restoranlar</div>
+    <div class="stores-row" id="storesList"></div>
+    <div class="section-title" style="padding-top:8px;">🔥 Chegirmalar</div>
+    <div class="discount-grid" id="discountList"></div>
+</div>
 
-    <!-- STORE HEADER -->
-    <div class="store-header hidden" id="storeHeader">
-        <button class="back-btn" onclick="showPage('home')">←</button>
-        <span class="store-title" id="storeTitle"></span>
+<!-- STORE PAGE -->
+<div class="page" id="page-store">
+    <div id="storeMenu"></div>
+</div>
+
+<!-- PROFILE PAGE -->
+<div class="page" id="page-profile">
+    <div class="profile-card">
+        <div class="profile-avatar" id="profileAvatar">👤</div>
+        <div class="profile-name" id="profileName">---</div>
+        <div class="profile-username" id="profileUsername">---</div>
+        <div class="profile-id" id="profileId">ID: ---</div>
     </div>
+    <div class="section-title">📋 Buyurtmalar tarixi</div>
+    <div style="padding:16px;color:var(--gray);text-align:center;" id="orderHistory">Hozircha bo'sh</div>
+</div>
 
-    <!-- PAGES -->
-    <div class="page active" id="page-home">
-        <div class="search-container relative">
-            <input type="text" class="search-input" id="searchInput" placeholder="Do'kon yoki mahsulot qidirish..." oninput="doSearch(this.value)">
-            <div class="search-results" id="searchResults"></div>
-        </div>
-        <div class="section">
-            <div class="section-title">🏪 Restoranlar</div>
-            <div class="stores-row" id="storesList"></div>
-        </div>
-        <div class="section">
-            <div class="section-title">🔥 Chegirmalar</div>
-            <div class="discount-grid" id="discountList"></div>
-        </div>
-    </div>
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+    <button class="nav-item active" id="navHome" onclick="showPage('home')"><span class="nav-icon">🏠</span>Bosh</button>
+    <button class="nav-item" id="navOrders" onclick="showOrders()"><span class="nav-icon">📋</span>Buyurtmalar</button>
+    <button class="nav-item" onclick="openCart()" style="position:relative;"><span class="nav-icon">🛒<span class="cart-badge" id="cartBadge">0</span></span>Savat</button>
+    <button class="nav-item" id="navProfile" onclick="showPage('profile')"><span class="nav-icon">👤</span>Profil</button>
+</div>
 
-    <div class="page" id="page-store">
-        <div id="storeMenu"></div>
-    </div>
+<script>
+const tg = window.Telegram.WebApp;
+tg.expand();
+tg.ready();
 
-    <div class="page" id="page-profile">
-        <div class="profile-card">
-            <div class="profile-avatar" id="profileAvatar">👤</div>
-            <div class="profile-name" id="profileName">Foydalanuvchi</div>
-            <div class="profile-username" id="profileUsername">@username</div>
-            <div class="profile-id" id="profileId">ID: 0</div>
-        </div>
-        <div class="section-title" style="padding:0 16px;">📋 Buyurtmalar tarixi</div>
-        <div id="orderHistory" style="padding:16px;color:var(--gray);text-align:center;">Hozircha bo'sh</div>
-    </div>
+let cart = [];
 
-    <!-- BOTTOM NAV -->
-    <div class="bottom-nav" id="bottomNav">
-        <button class="nav-item active" id="navHome" onclick="showPage('home')"><span class="nav-icon">🏠</span>Bosh</button>
-        <button class="nav-item" onclick="showPage('home');document.getElementById('searchInput').focus();"><span class="nav-icon">🔍</span>Qidirish</button>
-        <button class="nav-item" onclick="openCart()" style="position:relative;"><span class="nav-icon">🛒</span>Savat<span class="cart-badge" id="cartBadge" style="display:none;">0</span></button>
-        <button class="nav-item" id="navProfile" onclick="showPage('profile')"><span class="nav-icon">👤</span>Profil</button>
-    </div>
+const stores = [
+    { id: 1, name: "Lavash House", emoji: "🥙", time: "15-20 min", rating: "4.8" },
+    { id: 2, name: "Burger King", emoji: "🍔", time: "20-25 min", rating: "4.6" },
+    { id: 3, name: "Pizza Time", emoji: "🍕", time: "25-30 min", rating: "4.9" },
+    { id: 4, name: "Sushi Wok", emoji: "🍣", time: "30-35 min", rating: "4.7" },
+];
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.ready();
+const allProducts = {
+    1: [
+        { id: 1, name: "Lavash mol go'sht", price: 28000, emoji: "🥙", cat: "Lavash" },
+        { id: 2, name: "Lavash tovuqli", price: 25000, emoji: "🌯", cat: "Lavash" },
+        { id: 3, name: "Cola 0.5L", price: 8000, emoji: "🥤", cat: "Ichimliklar" },
+    ],
+    2: [
+        { id: 4, name: "Gamburger", price: 22000, emoji: "🍔", cat: "Burger" },
+        { id: 5, name: "Chizburger", price: 25000, emoji: "🍔", cat: "Burger" },
+    ],
+    3: [
+        { id: 6, name: "Pepperoni", price: 45000, emoji: "🍕", cat: "Pitsa" },
+        { id: 7, name: "Margarita", price: 38000, emoji: "🍕", cat: "Pitsa" },
+    ],
+    4: [
+        { id: 8, name: "Filadelfiya", price: 55000, emoji: "🍣", cat: "Sushi" },
+        { id: 9, name: "Kaliforniya", price: 48000, emoji: "🍣", cat: "Sushi" },
+    ],
+};
 
-        let cart = [];
-        let currentStore = null;
+const discounts = [
+    { name: "Lavash mol go'sht", oldPrice: 32000, price: 25000, emoji: "🥙", badge: "-22%" },
+    { name: "Gamburger", oldPrice: 28000, price: 19000, emoji: "🍔", badge: "-32%" },
+];
 
-        const stores = [
-            { id: 1, name: "Lavash House", emoji: "🥙", time: "15-20 min", rating: "4.8" },
-            { id: 2, name: "Burger King", emoji: "🍔", time: "20-25 min", rating: "4.6" },
-            { id: 3, name: "Pizza Time", emoji: "🍕", time: "25-30 min", rating: "4.9" },
-            { id: 4, name: "Sushi Wok", emoji: "🍣", time: "30-35 min", rating: "4.7" },
-        ];
-
-        const allProducts = {
-            1: [
-                { id: 1, name: "Lavash mol go'sht", price: 28000, emoji: "🥙", cat: "Lavash" },
-                { id: 2, name: "Lavash tovuqli", price: 25000, emoji: "🌯", cat: "Lavash" },
-                { id: 3, name: "Cola 0.5L", price: 8000, emoji: "🥤", cat: "Ichimliklar" },
-            ],
-            2: [
-                { id: 4, name: "Gamburger", price: 22000, emoji: "🍔", cat: "Burger" },
-                { id: 5, name: "Chizburger", price: 25000, emoji: "🍔", cat: "Burger" },
-            ],
-            3: [
-                { id: 6, name: "Pepperoni", price: 45000, emoji: "🍕", cat: "Pitsa" },
-                { id: 7, name: "Margarita", price: 38000, emoji: "🍕", cat: "Pitsa" },
-            ],
-            4: [
-                { id: 8, name: "Filadelfiya", price: 55000, emoji: "🍣", cat: "Sushi" },
-                { id: 9, name: "Kaliforniya", price: 48000, emoji: "🍣", cat: "Sushi" },
-            ],
-        };
-
-        const discounts = [
-            { name: "Lavash mol go'sht", oldPrice: 32000, price: 25000, emoji: "🥙", badge: "-22%" },
-            { name: "Gamburger", oldPrice: 28000, price: 19000, emoji: "🍔", badge: "-32%" },
-            { name: "Pepsi 1L", oldPrice: 14000, price: 9000, emoji: "🥤", badge: "-36%" },
-            { name: "Hot-Dog", oldPrice: 18000, price: 12000, emoji: "🌭", badge: "-33%" },
-        ];
-
-        function showPage(page) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            const pg = document.getElementById(`page-${page}`);
-            if (pg) pg.classList.add('active');
-
-            document.getElementById('mainHeader').classList.toggle('hidden', page === 'store');
-            document.getElementById('storeHeader').classList.toggle('hidden', page !== 'store');
-
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            if (page === 'home') document.getElementById('navHome').classList.add('active');
-            if (page === 'profile') document.getElementById('navProfile').classList.add('active');
-
-            if (page === 'profile') renderProfile();
-        }
-
-        function openStore(id) {
-            currentStore = stores.find(s => s.id === id);
-            if (!currentStore) return;
-            document.getElementById('storeTitle').textContent = currentStore.emoji + ' ' + currentStore.name;
-            showPage('store');
-            renderStoreMenu(id);
-        }
-
-        function renderStores() {
-            document.getElementById('storesList').innerHTML = stores.map(s => `
-                <div class="store-card" onclick="openStore(${s.id})">
-                    <div class="store-icon">${s.emoji}</div>
-                    <div class="store-name">${s.name}</div>
-                    <div class="store-meta">🕐 ${s.time} · ⭐ ${s.rating}</div>
-                </div>
-            `).join('');
-        }
-
-        function renderDiscounts() {
-            document.getElementById('discountList').innerHTML = discounts.map(d => `
-                <div class="discount-card">
-                    <div class="discount-img">${d.emoji}</div>
-                    <div class="discount-body">
-                        <div class="discount-name">${d.name}</div>
-                        <div class="discount-price">${d.price.toLocaleString()} so'm<span class="discount-old">${d.oldPrice.toLocaleString()}</span></div>
-                        <span class="discount-badge">${d.badge}</span>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderStoreMenu(storeId) {
-            const products = allProducts[storeId] || [];
-            const cats = {};
-            products.forEach(p => {
-                if (!cats[p.cat]) cats[p.cat] = [];
-                cats[p.cat].push(p);
-            });
-            let html = '';
-            for (const [cat, items] of Object.entries(cats)) {
-                html += `<div class="category-title">${cat}</div>`;
-                items.forEach(p => {
-                    html += `
-                        <div class="product-item">
-                            <div class="product-img">${p.emoji}</div>
-                            <div class="product-info">
-                                <div class="product-name">${p.name}</div>
-                                <div class="product-price">${p.price.toLocaleString()} so'm</div>
-                            </div>
-                            <button class="product-add" onclick="addToCart(${p.id}, ${storeId})">+</button>
-                        </div>`;
-                });
-            }
-            document.getElementById('storeMenu').innerHTML = html;
-        }
-
-        function addToCart(pid, sid) {
-            const p = allProducts[sid]?.find(x => x.id === pid);
-            if (!p) return;
-            const ex = cart.find(x => x.id === pid);
-            if (ex) ex.qty++;
-            else cart.push({ ...p, qty: 1 });
-            updateCartBadge();
-        }
-
-        function updateCartBadge() {
-            const c = cart.reduce((s, i) => s + i.qty, 0);
-            const b = document.getElementById('cartBadge');
-            b.textContent = c;
-            b.style.display = c > 0 ? 'block' : 'none';
-        }
-
-        function openCart() {
-            if (!cart.length) { tg.showAlert("Savat bo'sh!"); return; }
-            const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
-            const ov = document.createElement('div');
-            ov.className = 'cart-overlay';
-            ov.id = 'cartOverlay';
-            ov.innerHTML = `
-                <div style="display:flex;justify-content:space-between;margin-bottom:16px;">
-                    <strong>🛒 Savat</strong>
-                    <span onclick="document.getElementById('cartOverlay').remove()" style="cursor:pointer;font-size:20px;">✕</span>
-                </div>
-                ${cart.map(i => `<div class="cart-item-row"><span>${i.emoji} ${i.name} x${i.qty}</span><strong>${(i.price*i.qty).toLocaleString()} so'm</strong></div>`).join('')}
-                <div style="font-weight:700;font-size:18px;margin-top:12px;">💰 Jami: ${total.toLocaleString()} so'm</div>
-                <button class="order-btn" onclick="submitOrder()">📝 Buyurtma berish</button>
-            `;
-            document.body.appendChild(ov);
-        }
-
-        function submitOrder() {
-            const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
-            const items = cart.map(i => `${i.name} x${i.qty}`).join(', ');
-            tg.sendData(JSON.stringify({ action: "order", items, total }));
-            cart = [];
-            updateCartBadge();
-            document.getElementById('cartOverlay')?.remove();
-            tg.close();
-        }
-
-        function doSearch(q) {
-            const div = document.getElementById('searchResults');
-            if (q.length < 2) { div.style.display = 'none'; return; }
-            const ql = q.toLowerCase();
-            const found = [];
-            stores.filter(s => s.name.toLowerCase().includes(ql)).forEach(s => found.push({ type: 'store', ...s }));
-            for (const [sid, prods] of Object.entries(allProducts)) {
-                prods.filter(p => p.name.toLowerCase().includes(ql)).forEach(p => found.push({ type: 'product', ...p, storeName: stores.find(s => s.id == sid)?.name, storeId: parseInt(sid) }));
-            }
-            if (!found.length) { div.innerHTML = '<div style="padding:16px;color:#999;text-align:center;">Hech narsa topilmadi</div>'; div.style.display = 'block'; return; }
-            div.innerHTML = found.map(f => f.type === 'store' ? 
-                `<div class="search-item" onclick="openStore(${f.id});document.getElementById('searchInput').value='';div.style.display='none';"><span class="search-emoji">${f.emoji}</span><div class="search-info"><div class="search-name">${f.name}</div><div class="search-sub">🕐 ${f.time} · ⭐ ${f.rating}</div></div></div>` :
-                `<div class="search-item" onclick="openStore(${f.storeId});document.getElementById('searchInput').value='';div.style.display='none';"><span class="search-emoji">${f.emoji}</span><div class="search-info"><div class="search-name">${f.name}</div><div class="search-sub">${f.storeName} · ${f.price.toLocaleString()} so'm</div></div></div>`
-            ).join('');
-            div.style.display = 'block';
-        }
-
-        function renderProfile() {
-            const u = tg.initDataUnsafe?.user;
-            if (u) {
-                document.getElementById('profileName').textContent = u.first_name + (u.last_name ? ' ' + u.last_name : '');
-                document.getElementById('profileUsername').textContent = u.username ? '@' + u.username : '';
-                document.getElementById('profileId').textContent = 'ID: ' + u.id;
-                if (u.photo_url) {
-                    document.getElementById('profileAvatar').innerHTML = `<img src="${u.photo_url}" style="width:80px;height:80px;border-radius:50%;">`;
-                    document.getElementById('headerAvatar').innerHTML = `<img src="${u.photo_url}" style="width:36px;height:36px;border-radius:50%;">`;
-                }
-            }
-        }
-
-        document.addEventListener('click', e => {
-            if (!e.target.closest('#searchInput') && !e.target.closest('#searchResults')) {
-                document.getElementById('searchResults').style.display = 'none';
-            }
-        });
-
-        // INIT
-        renderStores();
-        renderDiscounts();
-        updateCartBadge();
+function showPage(p) {
+    document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+    const pg = document.getElementById('page-' + p);
+    if (pg) pg.classList.add('active');
+    
+    document.getElementById('mainHeader').classList.toggle('hidden', p === 'store');
+    document.getElementById('storeHeader').classList.toggle('hidden', p !== 'store');
+    
+    document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+    if (p === 'home') document.getElementById('navHome').classList.add('active');
+    if (p === 'profile') {
+        document.getElementById('navProfile').classList.add('active');
         renderProfile();
-    </script>
+    }
+}
+
+function openStore(id) {
+    const s = stores.find(x => x.id === id);
+    if (!s) return;
+    document.getElementById('storeTitle').textContent = s.emoji + ' ' + s.name;
+    showPage('store');
+    const prods = allProducts[id] || [];
+    const cats = {};
+    prods.forEach(p => { if (!cats[p.cat]) cats[p.cat] = []; cats[p.cat].push(p); });
+    let h = '';
+    for (const [c, items] of Object.entries(cats)) {
+        h += `<div class="cat-title">${c}</div>`;
+        items.forEach(p => {
+            h += `<div class="product-item"><div class="product-emoji">${p.emoji}</div><div class="product-info"><div class="product-name">${p.name}</div><div class="product-price">${p.price.toLocaleString()} so'm</div></div><button class="add-btn" onclick="addToCart(${p.id},${id})">+</button></div>`;
+        });
+    }
+    document.getElementById('storeMenu').innerHTML = h;
+}
+
+function addToCart(pid, sid) {
+    const p = allProducts[sid]?.find(x => x.id === pid);
+    if (!p) return;
+    const ex = cart.find(x => x.id === pid);
+    ex ? ex.qty++ : cart.push({ ...p, qty: 1 });
+    updateBadge();
+}
+
+function updateBadge() {
+    const c = cart.reduce((s,i) => s + i.qty, 0);
+    const b = document.getElementById('cartBadge');
+    b.textContent = c;
+    b.style.display = c > 0 ? 'inline-block' : 'none';
+}
+
+function openCart() {
+    if (!cart.length) { tg.showAlert("Savat bo'sh!"); return; }
+    const t = cart.reduce((s,i) => s + i.price*i.qty, 0);
+    const d = document.createElement('div');
+    d.className = 'cart-overlay';
+    d.innerHTML = `<div style="display:flex;justify-content:space-between;margin-bottom:12px;"><strong>🛒 Savat</strong><span onclick="this.parentElement.parentElement.remove()" style="cursor:pointer;font-size:18px;">✕</span></div>
+        ${cart.map(i => `<div class="cart-row"><span>${i.emoji} ${i.name} x${i.qty}</span><strong>${(i.price*i.qty).toLocaleString()} so'm</strong></div>`).join('')}
+        <div style="font-weight:700;font-size:17px;margin-top:8px;">💰 Jami: ${t.toLocaleString()} so'm</div>
+        <button class="order-btn" onclick="submitOrder()">📝 Buyurtma berish</button>`;
+    document.body.appendChild(d);
+}
+
+function submitOrder() {
+    const t = cart.reduce((s,i) => s + i.price*i.qty, 0);
+    const items = cart.map(i => `${i.name} x${i.qty}`).join(', ');
+    tg.sendData(JSON.stringify({ action: "order", items, total: t }));
+    cart = [];
+    updateBadge();
+    tg.close();
+}
+
+function doSearch(q) {
+    const d = document.getElementById('searchResults');
+    if (q.length < 2) { d.style.display = 'none'; return; }
+    const ql = q.toLowerCase();
+    const found = [];
+    stores.filter(s => s.name.toLowerCase().includes(ql)).forEach(s => found.push({ t: 'store', ...s }));
+    for (const [sid, prods] of Object.entries(allProducts)) {
+        prods.filter(p => p.name.toLowerCase().includes(ql)).forEach(p => found.push({ t: 'product', ...p, sid: +sid, sname: stores.find(s => s.id == sid)?.name }));
+    }
+    if (!found.length) { d.innerHTML = '<div style="padding:16px;color:#999;">Topilmadi</div>'; d.style.display = 'block'; return; }
+    d.innerHTML = found.map(f => f.t === 'store' ? 
+        `<div class="search-item" onclick="openStore(${f.id});d.style.display='none';document.getElementById('searchInput').value='';"><span class="search-emoji">${f.emoji}</span><div><div class="search-name">${f.name}</div><div class="search-sub">🕐 ${f.time} · ⭐ ${f.rating}</div></div></div>` :
+        `<div class="search-item" onclick="openStore(${f.sid});d.style.display='none';document.getElementById('searchInput').value='';"><span class="search-emoji">${f.emoji}</span><div><div class="search-name">${f.name}</div><div class="search-sub">${f.sname} · ${f.price.toLocaleString()} so'm</div></div></div>`
+    ).join('');
+    d.style.display = 'block';
+}
+
+function renderProfile() {
+    const u = tg.initDataUnsafe?.user;
+    if (u) {
+        document.getElementById('profileName').textContent = u.first_name + (u.last_name ? ' ' + u.last_name : '');
+        document.getElementById('profileUsername').textContent = u.username ? '@' + u.username : 'username yo\'q';
+        document.getElementById('profileId').textContent = 'ID: ' + u.id;
+        if (u.photo_url) {
+            document.getElementById('profileAvatar').innerHTML = `<img src="${u.photo_url}">`;
+            document.getElementById('headerAvatar').innerHTML = `<img src="${u.photo_url}">`;
+        }
+    }
+}
+
+function showOrders() {
+    showPage('profile');
+}
+
+document.addEventListener('click', e => {
+    if (!e.target.closest('#searchInput') && !e.target.closest('#searchResults')) {
+        document.getElementById('searchResults').style.display = 'none';
+    }
+});
+
+// INIT
+document.getElementById('storesList').innerHTML = stores.map(s => 
+    `<div class="store-card" onclick="openStore(${s.id})"><div class="store-icon">${s.emoji}</div><div class="store-name">${s.name}</div><div class="store-meta">🕐 ${s.time} · ⭐ ${s.rating}</div></div>`
+).join('');
+
+document.getElementById('discountList').innerHTML = discounts.map(d => 
+    `<div class="discount-card"><div class="discount-img">${d.emoji}</div><div class="discount-body"><div class="discount-name">${d.name}</div><div class="discount-price">${d.price.toLocaleString()} so'm<span class="discount-old">${d.oldPrice.toLocaleString()}</span></div><span class="discount-badge">${d.badge}</span></div></div>`
+).join('');
+
+updateBadge();
+renderProfile();
+</script>
 </body>
 </html>
