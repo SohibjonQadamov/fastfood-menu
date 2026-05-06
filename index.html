@@ -300,7 +300,12 @@ function updateCartFromModal(pid, delta) {
 function submitOrder() {
     const t = cart.reduce((s,i) => s + i.price*i.qty, 0);
     const items = cart.map(i => `${i.name} x${i.qty}`).join(', ');
-    tg.sendData(JSON.stringify({ action: "order", items, total: t }));
+
+    tg.sendData(JSON.stringify({
+        action: "order",
+        items,
+        total: t
+    }));
     cart = [];
     updateBadge();
     closeCart();
@@ -317,7 +322,7 @@ function doSearch(q) {
     for (const [sid, prods] of Object.entries(allProducts)) {
         prods.filter(p => p.name.toLowerCase().includes(ql)).forEach(p => found.push({ t: 'product', ...p, sid: +sid, sname: stores.find(s => s.id == sid)?.name }));
     }
-    d.innerHTML = found.length ? found.map(f => f.t === 'store' ? 
+    d.innerHTML = found.length ? found.map(f => f.t === 'store' ?
         `<div class="search-item" onclick="openStore(${f.id});d.style.display='none';document.getElementById('searchInput').value='';"><span class="search-emoji">${f.emoji}</span><div><div class="search-name">${f.name}</div><div class="search-sub">🕐 ${f.time} · ⭐ ${f.rating}</div></div></div>` :
         `<div class="search-item" onclick="openStore(${f.sid});d.style.display='none';document.getElementById('searchInput').value='';"><span class="search-emoji">${f.emoji}</span><div><div class="search-name">${f.name}</div><div class="search-sub">${f.sname} · ${f.price.toLocaleString()} so'm</div></div></div>`
     ).join('') : '<div class="empty-text">Topilmadi</div>';
@@ -344,10 +349,10 @@ document.addEventListener('click', e => {
 });
 
 // INIT
-document.getElementById('storesList').innerHTML = stores.map(s => 
+document.getElementById('storesList').innerHTML = stores.map(s =>
     `<div class="store-card" onclick="openStore(${s.id})"><div class="store-icon">${s.emoji}</div><div class="store-name">${s.name}</div><div class="store-meta">🕐 ${s.time} · ⭐ ${s.rating}</div></div>`
 ).join('');
-document.getElementById('discountList').innerHTML = discounts.map(d => 
+document.getElementById('discountList').innerHTML = discounts.map(d =>
     `<div class="discount-card"><div class="discount-img">${d.emoji}</div><div class="discount-body"><div class="discount-name">${d.name}</div><div class="discount-price">${d.price.toLocaleString()} so'm<span class="discount-old">${d.oldPrice.toLocaleString()}</span></div><span class="discount-badge">${d.badge}</span></div></div>`
 ).join('');
 updateBadge();
