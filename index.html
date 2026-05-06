@@ -19,7 +19,7 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--bg);
@@ -78,7 +78,7 @@
             scrollbar-width: none;
         }
         .stores-scroll::-webkit-scrollbar { display: none; }
-        
+
         .store-card {
             min-width: 130px;
             background: var(--white);
@@ -313,254 +313,354 @@
 </head>
 <body>
 
-    <!-- ===== HEADER ===== -->
-    <div class="header" id="mainHeader">
-        <div class="header-logo">🍔 Fast Food</div>
-        <div class="header-icons">
-            <span>🔍</span>
-            <span onclick="showPage('profile')">👤</span>
-        </div>
+<!-- ===== HEADER ===== -->
+<div class="header" id="mainHeader">
+    <div class="header-logo">🍔 Fast Food</div>
+    <div class="header-icons">
+        <span>🔍</span>
+        <span onclick="showPage('profile')">👤</span>
     </div>
+</div>
 
-    <!-- Store ichidagi header -->
-    <div class="header hidden" id="storeHeader" style="background:white;">
-        <button class="back-btn" onclick="showPage('home')">←</button>
-        <div style="font-weight:700;font-size:16px;" id="storeTitle"></div>
-        <div style="width:30px;"></div>
+<!-- Store ichidagi header -->
+<div class="header hidden" id="storeHeader" style="background:white;">
+    <button class="back-btn" onclick="showPage('home')">←</button>
+    <div style="font-weight:700;font-size:16px;" id="storeTitle"></div>
+    <div style="width:30px;"></div>
+</div>
+
+<!-- Location -->
+<div class="location-bar">📍 Toshkent, Chilonzor tumani</div>
+<!-- QIDIRUV -->
+<div style="padding: 0 16px; margin-bottom: 10px;">
+    <input type="text" id="searchInput" placeholder="🔍 Qidirish..."
+           style="width:100%;padding:12px 16px;border:none;border-radius:12px;background:white;font-size:15px;box-shadow:0 2px 8px rgba(0,0,0,0.06);"
+           oninput="searchAll(this.value)">
+    <div id="searchResults"
+         style="display:none;background:white;border-radius:12px;margin-top:8px;padding:8px;box-shadow:0 4px 16px rgba(0,0,0,0.1);max-height:300px;overflow-y:auto;"></div>
+</div>
+<!-- ===== PAGES ===== -->
+<div class="page active" id="page-home">
+    <div class="section-title">🏪 Restoranlar</div>
+    <div class="stores-scroll" id="storesList"></div>
+
+    <div class="discount-section">
+        <div class="section-title" style="padding-top:0;">🔥 Chegirmalar</div>
+        <div class="discount-grid" id="discountList"></div>
     </div>
+</div>
 
-    <!-- Location -->
-    <div class="location-bar">📍 Toshkent, Chilonzor tumani</div>
+<div class="page" id="page-store">
+    <div class="store-menu" id="storeMenu"></div>
+</div>
 
-    <!-- ===== PAGES ===== -->
-    <div class="page active" id="page-home">
-        <div class="section-title">🏪 Restoranlar</div>
-        <div class="stores-scroll" id="storesList"></div>
-
-        <div class="discount-section">
-            <div class="section-title" style="padding-top:0;">🔥 Chegirmalar</div>
-            <div class="discount-grid" id="discountList"></div>
-        </div>
+<div class="page" id="page-profile">
+    <div style="padding:30px 20px;text-align:center;">
+        <div id="profileAvatar" style="font-size:80px;">👤</div>
+        <h2 id="profileName" style="margin-top:10px;">Foydalanuvchi</h2>
+        <p id="profilePhone" style="color:var(--gray);">@username</p>
+        <p id="profileId" style="color:var(--gray);font-size:12px;">ID: 123456</p>
     </div>
-
-    <div class="page" id="page-store">
-        <div class="store-menu" id="storeMenu"></div>
+    <div style="padding:0 16px;">
+        <div class="section-title">📋 Buyurtmalar tarixi</div>
+        <div id="orderHistory"></div>
     </div>
+</div>
 
-    <div class="page" id="page-profile">
-        <div style="padding:20px;text-align:center;">
-            <div style="font-size:60px;">👤</div>
-            <h3 id="profileName">Foydalanuvchi</h3>
-            <p style="color:var(--gray);">Buyurtmalar tarixi</p>
-            <div id="orderHistory" style="text-align:left;margin-top:20px;"></div>
-        </div>
-    </div>
+<!-- ===== BOTTOM NAV ===== -->
+<div class="bottom-nav" id="bottomNav">
+    <button class="nav-item active" onclick="showPage('home')">
+        <span class="nav-icon">🏠</span> Bosh
+    </button>
+    <button class="nav-item" onclick="showPage('home')">
+        <span class="nav-icon">🔍</span> Qidirish
+    </button>
+    <button class="nav-item" onclick="toggleCart()" style="position:relative;">
+        <span class="nav-icon">🛒</span> Savat
+        <span class="cart-badge" id="cartBadge" style="display:none;">0</span>
+    </button>
+    <button class="nav-item" onclick="showPage('profile')">
+        <span class="nav-icon">👤</span> Profil
+    </button>
+</div>
 
-    <!-- ===== BOTTOM NAV ===== -->
-    <div class="bottom-nav" id="bottomNav">
-        <button class="nav-item active" onclick="showPage('home')">
-            <span class="nav-icon">🏠</span> Bosh
-        </button>
-        <button class="nav-item" onclick="showPage('home')">
-            <span class="nav-icon">🔍</span> Qidirish
-        </button>
-        <button class="nav-item" onclick="toggleCart()" style="position:relative;">
-            <span class="nav-icon">🛒</span> Savat
-            <span class="cart-badge" id="cartBadge" style="display:none;">0</span>
-        </button>
-        <button class="nav-item" onclick="showPage('profile')">
-            <span class="nav-icon">👤</span> Profil
-        </button>
-    </div>
-
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.ready();
-
-        let currentPage = 'home';
-        let currentStore = null;
-        let cart = [];
-
-        // DEFAULT DATA
-        const stores = [
-            { id: 1, name: "Lavash House", emoji: "🥙", time: "15-20 min", rating: "4.8", address: "Chilonzor" },
-            { id: 2, name: "Burger King", emoji: "🍔", time: "20-25 min", rating: "4.6", address: "Mirzo Ulug'bek" },
-            { id: 3, name: "Pizza Time", emoji: "🍕", time: "25-30 min", rating: "4.9", address: "Yunusobod" },
-            { id: 4, name: "Sushi Wok", emoji: "🍣", time: "30-35 min", rating: "4.7", address: "Shayxontohur" },
-        ];
-
-        const allProducts = {
-            1: [
-                { id: 1, name: "Lavash mol go'sht", price: 28000, emoji: "🥙", category: "Lavash" },
-                { id: 2, name: "Lavash tovuqli", price: 25000, emoji: "🌯", category: "Lavash" },
-                { id: 3, name: "Cola 0.5L", price: 8000, emoji: "🥤", category: "Ichimliklar" },
-            ],
-            2: [
-                { id: 4, name: "Gamburger", price: 22000, emoji: "🍔", category: "Burger" },
-                { id: 5, name: "Chizburger", price: 25000, emoji: "🍔", category: "Burger" },
-            ],
-            3: [
-                { id: 6, name: "Pepperoni", price: 45000, emoji: "🍕", category: "Pitsa" },
-                { id: 7, name: "Margarita", price: 38000, emoji: "🍕", category: "Pitsa" },
-            ],
-            4: [
-                { id: 8, name: "Filadelfiya", price: 55000, emoji: "🍣", category: "Sushi" },
-                { id: 9, name: "Kaliforniya", price: 48000, emoji: "🍣", category: "Sushi" },
-            ],
-        };
-
-        const discounts = [
-            { name: "Lavash mol go'sht", oldPrice: 32000, price: 25000, emoji: "🥙", badge: "-22%" },
-            { name: "Gamburger", oldPrice: 28000, price: 19000, emoji: "🍔", badge: "-32%" },
-            { name: "Pepsi 1L", oldPrice: 14000, price: 9000, emoji: "🥤", badge: "-36%" },
-            { name: "Hot-Dog", oldPrice: 18000, price: 12000, emoji: "🌭", badge: "-33%" },
-        ];
-
-        function showPage(page) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(`page-${page}`).classList.add('active');
-            currentPage = page;
-
-            // Header toggle
-            if (page === 'home' || page === 'profile') {
-                document.getElementById('mainHeader').classList.remove('hidden');
-                document.getElementById('storeHeader').classList.add('hidden');
+<script>
+    function searchAll(query) {
+    const q = query.toLowerCase().trim();
+    const resultsDiv = document.getElementById('searchResults');
+    
+    if (q.length < 2) {
+        resultsDiv.style.display = 'none';
+        return;
+    }
+    
+    // Do'konlarni qidirish
+    const foundStores = stores.filter(s => s.name.toLowerCase().includes(q));
+    
+    // Barcha mahsulotlarni qidirish
+    let foundProducts = [];
+    for (const [storeId, products] of Object.entries(allProducts)) {
+        products.forEach(p => {
+            if (p.name.toLowerCase().includes(q)) {
+                foundProducts.push({ ...p, storeId: parseInt(storeId), storeName: stores.find(s => s.id == storeId)?.name });
             }
-
-            // Nav active
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            if (page === 'home') document.querySelectorAll('.nav-item')[0].classList.add('active');
-            if (page === 'profile') document.querySelectorAll('.nav-item')[3].classList.add('active');
-
-            if (page === 'profile') renderProfile();
-        }
-
-        function openStore(storeId) {
-            currentStore = stores.find(s => s.id === storeId);
-            document.getElementById('storeTitle').textContent = currentStore.emoji + ' ' + currentStore.name;
-            document.getElementById('mainHeader').classList.add('hidden');
-            document.getElementById('storeHeader').classList.remove('hidden');
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('page-store').classList.add('active');
-            currentPage = 'store';
-            renderStoreMenu(storeId);
-        }
-
-        function renderStores() {
-            document.getElementById('storesList').innerHTML = stores.map(s => `
-                <div class="store-card" onclick="openStore(${s.id})">
-                    <div class="store-avatar">${s.emoji}</div>
-                    <div class="store-name">${s.name}</div>
-                    <div class="store-time">🕐 ${s.time}</div>
-                    <div class="store-rating">⭐ ${s.rating}</div>
+        });
+    }
+    
+    // Chegirmalarni qidirish
+    const foundDiscounts = discounts.filter(d => d.name.toLowerCase().includes(q));
+    
+    if (foundStores.length === 0 && foundProducts.length === 0 && foundDiscounts.length === 0) {
+        resultsDiv.style.display = 'block';
+        resultsDiv.innerHTML = '<p style="padding:12px;color:#999;text-align:center;">Hech narsa topilmadi</p>';
+        return;
+    }
+    
+    let html = '';
+    
+    if (foundStores.length > 0) {
+        html += '<div style="font-size:12px;color:#999;padding:8px;">🏪 DO\'KONLAR</div>';
+        foundStores.forEach(s => {
+            html += `<div onclick="openStore(${s.id});document.getElementById('searchInput').value='';document.getElementById('searchResults').style.display='none';" style="padding:10px;cursor:pointer;display:flex;align-items:center;gap:10px;border-radius:8px;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">
+                <span style="font-size:24px;">${s.emoji}</span>
+                <div>
+                    <div style="font-weight:600;">${s.name}</div>
+                    <div style="font-size:12px;color:#999;">🕐 ${s.time} · ⭐ ${s.rating}</div>
                 </div>
-            `).join('');
+            </div>`;
+        });
+    }
+    
+    if (foundProducts.length > 0) {
+        html += '<div style="font-size:12px;color:#999;padding:8px;">🍔 MAHSULOTLAR</div>';
+        foundProducts.forEach(p => {
+            html += `<div onclick="openStore(${p.storeId});document.getElementById('searchInput').value='';document.getElementById('searchResults').style.display='none';" style="padding:10px;cursor:pointer;display:flex;align-items:center;gap:10px;border-radius:8px;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">
+                <span style="font-size:24px;">${p.emoji}</span>
+                <div>
+                    <div style="font-weight:600;">${p.name}</div>
+                    <div style="font-size:12px;color:#999;">${p.storeName} · ${p.price.toLocaleString()} so'm</div>
+                </div>
+            </div>`;
+        });
+    }
+    
+    if (foundDiscounts.length > 0) {
+        html += '<div style="font-size:12px;color:#999;padding:8px;">🔥 CHEGIRMALAR</div>';
+        foundDiscounts.forEach(d => {
+            html += `<div style="padding:10px;cursor:pointer;display:flex;align-items:center;gap:10px;border-radius:8px;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">
+                <span style="font-size:24px;">${d.emoji}</span>
+                <div>
+                    <div style="font-weight:600;">${d.name}</div>
+                    <div style="font-size:12px;">${d.price.toLocaleString()} so'm <span style="color:#ff3b30;">${d.badge}</span></div>
+                </div>
+            </div>`;
+        });
+    }
+    
+    resultsDiv.style.display = 'block';
+    resultsDiv.innerHTML = html;
+}
+
+// Qidiruv natijalarini yopish (tashqariga bosganda)
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('#searchInput') && !e.target.closest('#searchResults')) {
+        document.getElementById('searchResults').style.display = 'none';
+    }
+});
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.ready();
+
+    let currentPage = 'home';
+    let currentStore = null;
+    let cart = [];
+
+    // DEFAULT DATA
+    const stores = [
+        { id: 1, name: "Lavash House", emoji: "🥙", time: "15-20 min", rating: "4.8", address: "Chilonzor" },
+        { id: 2, name: "Burger King", emoji: "🍔", time: "20-25 min", rating: "4.6", address: "Mirzo Ulug'bek" },
+        { id: 3, name: "Pizza Time", emoji: "🍕", time: "25-30 min", rating: "4.9", address: "Yunusobod" },
+        { id: 4, name: "Sushi Wok", emoji: "🍣", time: "30-35 min", rating: "4.7", address: "Shayxontohur" },
+    ];
+
+    const allProducts = {
+        1: [
+            { id: 1, name: "Lavash mol go'sht", price: 28000, emoji: "🥙", category: "Lavash" },
+            { id: 2, name: "Lavash tovuqli", price: 25000, emoji: "🌯", category: "Lavash" },
+            { id: 3, name: "Cola 0.5L", price: 8000, emoji: "🥤", category: "Ichimliklar" },
+        ],
+        2: [
+            { id: 4, name: "Gamburger", price: 22000, emoji: "🍔", category: "Burger" },
+            { id: 5, name: "Chizburger", price: 25000, emoji: "🍔", category: "Burger" },
+        ],
+        3: [
+            { id: 6, name: "Pepperoni", price: 45000, emoji: "🍕", category: "Pitsa" },
+            { id: 7, name: "Margarita", price: 38000, emoji: "🍕", category: "Pitsa" },
+        ],
+        4: [
+            { id: 8, name: "Filadelfiya", price: 55000, emoji: "🍣", category: "Sushi" },
+            { id: 9, name: "Kaliforniya", price: 48000, emoji: "🍣", category: "Sushi" },
+        ],
+    };
+
+    const discounts = [
+        { name: "Lavash mol go'sht", oldPrice: 32000, price: 25000, emoji: "🥙", badge: "-22%" },
+        { name: "Gamburger", oldPrice: 28000, price: 19000, emoji: "🍔", badge: "-32%" },
+        { name: "Pepsi 1L", oldPrice: 14000, price: 9000, emoji: "🥤", badge: "-36%" },
+        { name: "Hot-Dog", oldPrice: 18000, price: 12000, emoji: "🌭", badge: "-33%" },
+    ];
+
+    function showPage(page) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(`page-${page}`).classList.add('active');
+        currentPage = page;
+
+        // Header toggle
+        if (page === 'home' || page === 'profile') {
+            document.getElementById('mainHeader').classList.remove('hidden');
+            document.getElementById('storeHeader').classList.add('hidden');
         }
 
-        function renderDiscounts() {
-            document.getElementById('discountList').innerHTML = discounts.map(d => `
-                <div class="discount-card">
-                    <div class="discount-img">${d.emoji}</div>
-                    <div class="discount-info">
-                        <div class="discount-name">${d.name}</div>
-                        <div class="discount-price">
-                            ${d.price.toLocaleString()} so'm
-                            <span class="discount-old">${d.oldPrice.toLocaleString()}</span>
+        // Nav active
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        if (page === 'home') document.querySelectorAll('.nav-item')[0].classList.add('active');
+        if (page === 'profile') document.querySelectorAll('.nav-item')[3].classList.add('active');
+
+        if (page === 'profile') renderProfile();
+    }
+
+    function openStore(storeId) {
+        currentStore = stores.find(s => s.id === storeId);
+        document.getElementById('storeTitle').textContent = currentStore.emoji + ' ' + currentStore.name;
+        document.getElementById('mainHeader').classList.add('hidden');
+        document.getElementById('storeHeader').classList.remove('hidden');
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById('page-store').classList.add('active');
+        currentPage = 'store';
+        renderStoreMenu(storeId);
+    }
+
+    function renderStores() {
+        document.getElementById('storesList').innerHTML = stores.map(s => `
+            <div class="store-card" onclick="openStore(${s.id})">
+                <div class="store-avatar">${s.emoji}</div>
+                <div class="store-name">${s.name}</div>
+                <div class="store-time">🕐 ${s.time}</div>
+                <div class="store-rating">⭐ ${s.rating}</div>
+            </div>
+        `).join('');
+    }
+
+    function renderDiscounts() {
+        document.getElementById('discountList').innerHTML = discounts.map(d => `
+            <div class="discount-card">
+                <div class="discount-img">${d.emoji}</div>
+                <div class="discount-info">
+                    <div class="discount-name">${d.name}</div>
+                    <div class="discount-price">
+                        ${d.price.toLocaleString()} so'm
+                        <span class="discount-old">${d.oldPrice.toLocaleString()}</span>
+                    </div>
+                    <span class="discount-badge">${d.badge}</span>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function renderStoreMenu(storeId) {
+        const products = allProducts[storeId] || [];
+        const categories = {};
+        products.forEach(p => {
+            if (!categories[p.category]) categories[p.category] = [];
+            categories[p.category].push(p);
+        });
+
+        let html = '';
+        for (const [cat, items] of Object.entries(categories)) {
+            html += `<div class="category-title">${cat}</div><div class="product-list">`;
+            items.forEach(p => {
+                html += `
+                    <div class="product-item">
+                        <div class="product-emoji">${p.emoji}</div>
+                        <div class="product-detail">
+                            <div class="product-name">${p.name}</div>
+                            <div class="product-price">${p.price.toLocaleString()} so'm</div>
                         </div>
-                        <span class="discount-badge">${d.badge}</span>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderStoreMenu(storeId) {
-            const products = allProducts[storeId] || [];
-            const categories = {};
-            products.forEach(p => {
-                if (!categories[p.category]) categories[p.category] = [];
-                categories[p.category].push(p);
+                        <button class="product-add" onclick="addToCart(${p.id}, ${storeId})">+</button>
+                    </div>`;
             });
-
-            let html = '';
-            for (const [cat, items] of Object.entries(categories)) {
-                html += `<div class="category-title">${cat}</div><div class="product-list">`;
-                items.forEach(p => {
-                    html += `
-                        <div class="product-item">
-                            <div class="product-emoji">${p.emoji}</div>
-                            <div class="product-detail">
-                                <div class="product-name">${p.name}</div>
-                                <div class="product-price">${p.price.toLocaleString()} so'm</div>
-                            </div>
-                            <button class="product-add" onclick="addToCart(${p.id}, ${storeId})">+</button>
-                        </div>`;
-                });
-                html += '</div>';
-            }
-            document.getElementById('storeMenu').innerHTML = html;
+            html += '</div>';
         }
+        document.getElementById('storeMenu').innerHTML = html;
+    }
 
-        function addToCart(productId, storeId) {
-            const product = allProducts[storeId]?.find(p => p.id === productId);
-            if (!product) return;
-            const existing = cart.find(i => i.id === productId);
-            if (existing) existing.qty += 1;
-            else cart.push({ ...product, qty: 1, storeId });
-            updateCartBadge();
-        }
-
-        function updateCartBadge() {
-            const count = cart.reduce((s, i) => s + i.qty, 0);
-            const badge = document.getElementById('cartBadge');
-            badge.textContent = count;
-            badge.style.display = count > 0 ? 'block' : 'none';
-        }
-
-        function toggleCart() {
-            if (cart.length === 0) { tg.showAlert("Savat bo'sh!"); return; }
-            const overlay = document.createElement('div');
-            overlay.className = 'cart-overlay';
-            overlay.id = 'cartOverlay';
-            const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
-            overlay.innerHTML = `
-                <div style="display:flex;justify-content:space-between;margin-bottom:16px;">
-                    <strong>🛒 Savat</strong>
-                    <span onclick="document.getElementById('cartOverlay').remove()" style="cursor:pointer;">✕</span>
-                </div>
-                ${cart.map(i => `
-                    <div class="cart-item-row">
-                        <span>${i.emoji} ${i.name} x${i.qty}</span>
-                        <strong>${(i.price * i.qty).toLocaleString()} so'm</strong>
-                    </div>
-                `).join('')}
-                <div style="font-weight:700;font-size:18px;margin-top:12px;">Jami: ${total.toLocaleString()} so'm</div>
-                <button class="order-submit" onclick="submitOrder()">📝 Buyurtma berish</button>
-            `;
-            document.body.appendChild(overlay);
-        }
-
-        function submitOrder() {
-            const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
-            const items = cart.map(i => `${i.name} x${i.qty}`).join(', ');
-            tg.sendData(JSON.stringify({ action: "order", items, total }));
-            cart = [];
-            updateCartBadge();
-            const ov = document.getElementById('cartOverlay');
-            if (ov) ov.remove();
-            tg.close();
-        }
-
-        function renderProfile() {
-            const user = tg.initDataUnsafe?.user;
-            document.getElementById('profileName').textContent = user?.first_name || 'Foydalanuvchi';
-            document.getElementById('orderHistory').innerHTML = '<p style="color:var(--gray);">Hozircha buyurtmalar yo\'q</p>';
-        }
-
-        // INIT
-        renderStores();
-        renderDiscounts();
+    function addToCart(productId, storeId) {
+        const product = allProducts[storeId]?.find(p => p.id === productId);
+        if (!product) return;
+        const existing = cart.find(i => i.id === productId);
+        if (existing) existing.qty += 1;
+        else cart.push({ ...product, qty: 1, storeId });
         updateCartBadge();
-    </script>
+    }
+
+    function updateCartBadge() {
+        const count = cart.reduce((s, i) => s + i.qty, 0);
+        const badge = document.getElementById('cartBadge');
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'block' : 'none';
+    }
+
+    function toggleCart() {
+        if (cart.length === 0) { tg.showAlert("Savat bo'sh!"); return; }
+        const overlay = document.createElement('div');
+        overlay.className = 'cart-overlay';
+        overlay.id = 'cartOverlay';
+        const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+        overlay.innerHTML = `
+            <div style="display:flex;justify-content:space-between;margin-bottom:16px;">
+                <strong>🛒 Savat</strong>
+                <span onclick="document.getElementById('cartOverlay').remove()" style="cursor:pointer;">✕</span>
+            </div>
+            ${cart.map(i => `
+                <div class="cart-item-row">
+                    <span>${i.emoji} ${i.name} x${i.qty}</span>
+                    <strong>${(i.price * i.qty).toLocaleString()} so'm</strong>
+                </div>
+            `).join('')}
+            <div style="font-weight:700;font-size:18px;margin-top:12px;">Jami: ${total.toLocaleString()} so'm</div>
+            <button class="order-submit" onclick="submitOrder()">📝 Buyurtma berish</button>
+        `;
+        document.body.appendChild(overlay);
+    }
+
+    function submitOrder() {
+        const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+        const items = cart.map(i => `${i.name} x${i.qty}`).join(', ');
+        tg.sendData(JSON.stringify({ action: "order", items, total }));
+        cart = [];
+        updateCartBadge();
+        const ov = document.getElementById('cartOverlay');
+        if (ov) ov.remove();
+        tg.close();
+    }
+
+    function renderProfile() {
+    const user = tg.initDataUnsafe?.user;
+    if (user) {
+        document.getElementById('profileName').textContent = user.first_name + (user.last_name ? ' ' + user.last_name : '');
+        document.getElementById('profilePhone').textContent = user.username ? '@' + user.username : '';
+        document.getElementById('profileId').textContent = 'ID: ' + user.id;
+        if (user.photo_url) {
+            document.getElementById('profileAvatar').innerHTML = `<img src="${user.photo_url}" style="width:80px;height:80px;border-radius:50%;">`;
+        }
+    }
+    document.getElementById('orderHistory').innerHTML = '<p style="color:var(--gray);text-align:center;">🕐 Buyurtmalar tarixi bo\'sh</p>';
+}
+
+    // INIT
+    renderStores();
+    renderDiscounts();
+    updateCartBadge();
+</script>
 </body>
 </html>
