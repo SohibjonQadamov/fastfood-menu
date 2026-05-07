@@ -7,94 +7,243 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --yellow: #FFD700; --red: #FF3B30; --green: #34C759;
+            --yellow: #FFD700; --yellow-dark: #E5C700;
+            --red: #FF3B30; --green: #34C759;
             --bg: #F2F2F7; --card: #FFFFFF; --text: #1C1C1E;
             --gray: #8E8E93; --sep: #E5E5EA;
-            --radius: 14px; --shadow: 0 1px 3px rgba(0,0,0,0.06);
+            --radius: 16px; --radius-sm: 12px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+            --transition: 0.2s cubic-bezier(0.25, 0.8, 0.25, 1.2);
         }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 80px; -webkit-tap-highlight-color: transparent; }
-        .page { display: none; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding-bottom: 80px;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        .page { display: none; animation: fadeIn 0.3s ease; }
         .page.active { display: block; }
         .hidden { display: none !important; }
 
+        /* ANIMATIONS */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        @keyframes bounceIn { 0% { transform: scale(0); opacity: 0; } 60% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
+
         /* HEADER */
-        .header { background: var(--yellow); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-        .header h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
-        .header-avatar { width: 36px; height: 36px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; font-size: 18px; overflow: hidden; cursor: pointer; border: none; }
+        .header {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 2px 10px rgba(255,165,0,0.2);
+        }
+        .header h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; color: #1a1a1a; }
+        .header-avatar {
+            width: 38px; height: 38px; border-radius: 50%;
+            background: white; display: flex; align-items: center; justify-content: center;
+            font-size: 18px; overflow: hidden; cursor: pointer; border: 2px solid rgba(0,0,0,0.1);
+            transition: var(--transition);
+        }
+        .header-avatar:active { transform: scale(0.9); }
         .header-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .store-header { background: white; padding: 12px 16px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--sep); }
-        .back-btn { background: none; border: none; font-size: 22px; cursor: pointer; padding: 4px; }
+
+        .store-header {
+            background: white; padding: 12px 16px; display: flex; align-items: center; gap: 12px;
+            position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--sep);
+        }
+        .back-btn {
+            background: none; border: none; font-size: 22px; cursor: pointer;
+            padding: 8px; transition: var(--transition); border-radius: 50%;
+        }
+        .back-btn:active { background: #f0f0f0; transform: scale(0.9); }
         .store-title { font-weight: 700; font-size: 17px; }
 
         /* SEARCH */
-        .search-box { padding: 8px 14px 4px; position: relative; }
-        .search-input { width: 100%; padding: 11px 36px; border: none; border-radius: 10px; background: #E8E8ED; font-size: 15px; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="%238E8E93" stroke-width="2.5"><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>'); background-repeat: no-repeat; background-position: 10px center; }
-        .search-results { display: none; position: absolute; left: 14px; right: 14px; top: 48px; background: white; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.18); max-height: 280px; overflow-y: auto; z-index: 200; }
-        .search-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; }
-        .search-item:active { background: #f0f0f0; }
-        .search-emoji { font-size: 24px; }
+        .search-box { padding: 10px 14px; position: relative; }
+        .search-input {
+            width: 100%; padding: 12px 40px; border: none; border-radius: var(--radius-sm);
+            background: #E8E8ED; font-size: 15px; transition: var(--transition);
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="%238E8E93" stroke-width="2.5"><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>');
+            background-repeat: no-repeat; background-position: 12px center;
+        }
+        .search-input:focus { background: white; box-shadow: 0 0 0 3px rgba(255,215,0,0.3); outline: none; }
+        .search-results {
+            display: none; position: absolute; left: 14px; right: 14px; top: 52px;
+            background: white; border-radius: var(--radius); box-shadow: var(--shadow-lg);
+            max-height: 300px; overflow-y: auto; z-index: 200; animation: fadeIn 0.2s ease;
+        }
+        .search-item {
+            display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+            cursor: pointer; transition: background 0.15s;
+        }
+        .search-item:active { background: #f5f5f5; }
+        .search-emoji { font-size: 24px; width: 35px; text-align: center; }
         .search-name { font-weight: 600; font-size: 14px; }
         .search-sub { font-size: 12px; color: var(--gray); }
 
+        /* CATEGORY CHIPS */
+        .chips-row {
+            display: flex; gap: 8px; padding: 6px 14px 12px; overflow-x: auto;
+            scrollbar-width: none; -webkit-overflow-scrolling: touch;
+        }
+        .chips-row::-webkit-scrollbar { display: none; }
+        .chip {
+            padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600;
+            white-space: nowrap; cursor: pointer; border: none;
+            background: var(--card); color: var(--text);
+            box-shadow: var(--shadow-sm); transition: var(--transition);
+        }
+        .chip.active { background: var(--yellow); color: #1a1a1a; }
+        .chip:active { transform: scale(0.95); }
+
         /* SECTIONS */
-        .section-title { font-size: 20px; font-weight: 700; padding: 18px 14px 8px; }
-        .stores-row { display: flex; gap: 12px; overflow-x: auto; padding: 0 14px 8px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+        .section-title { font-size: 20px; font-weight: 700; padding: 16px 14px 6px; }
+        .stores-row {
+            display: flex; gap: 12px; overflow-x: auto; padding: 4px 14px 8px;
+            scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+        }
         .stores-row::-webkit-scrollbar { display: none; }
-        .store-card { min-width: 130px; background: var(--card); border-radius: var(--radius); padding: 14px 12px; text-align: center; box-shadow: var(--shadow); cursor: pointer; scroll-snap-align: start; transition: .15s; }
-        .store-card:active { transform: scale(.96); background: #F9F9F9; }
-        .store-icon { font-size: 34px; }
-        .store-name { font-size: 13px; font-weight: 600; margin-top: 6px; }
-        .store-meta { font-size: 11px; color: var(--gray); margin-top: 2px; }
+        
+        .store-card {
+            min-width: 145px; background: var(--card); border-radius: var(--radius);
+            padding: 18px 14px; text-align: center; box-shadow: var(--shadow-sm);
+            cursor: pointer; scroll-snap-align: start; transition: var(--transition);
+            border: 1px solid transparent;
+        }
+        .store-card:hover { box-shadow: var(--shadow-md); border-color: var(--yellow); }
+        .store-card:active { transform: scale(0.96); background: #FFFDE7; }
+        .store-icon { font-size: 40px; transition: var(--transition); }
+        .store-card:active .store-icon { animation: pulse 0.3s ease; }
+        .store-name { font-size: 14px; font-weight: 700; margin-top: 8px; }
+        .store-meta { font-size: 11px; color: var(--gray); margin-top: 3px; }
+        .store-badge {
+            display: inline-block; background: var(--green); color: white;
+            font-size: 10px; padding: 2px 8px; border-radius: 10px; margin-top: 4px;
+        }
 
         /* DISCOUNTS */
         .discount-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 14px; }
-        .discount-card { background: var(--card); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); cursor: pointer; }
-        .discount-img { height: 75px; background: linear-gradient(135deg, #FF6B6B, #FF4757); display: flex; align-items: center; justify-content: center; font-size: 38px; }
+        .discount-card {
+            background: var(--card); border-radius: var(--radius); overflow: hidden;
+            box-shadow: var(--shadow-sm); cursor: pointer; transition: var(--transition);
+        }
+        .discount-card:active { transform: scale(0.97); box-shadow: var(--shadow-md); }
+        .discount-img {
+            height: 85px; background: linear-gradient(135deg, #FF6B6B, #FF4757);
+            display: flex; align-items: center; justify-content: center; font-size: 42px;
+        }
         .discount-body { padding: 10px 12px; }
-        .discount-name { font-size: 12px; font-weight: 600; }
-        .discount-price { font-size: 15px; font-weight: 700; color: var(--red); }
-        .discount-old { font-size: 10px; color: var(--gray); text-decoration: line-through; margin-left: 4px; }
-        .discount-badge { background: var(--red); color: white; font-size: 9px; padding: 2px 6px; border-radius: 8px; display: inline-block; margin-top: 2px; }
+        .discount-name { font-size: 13px; font-weight: 700; }
+        .discount-price { font-size: 16px; font-weight: 800; color: var(--red); }
+        .discount-old { font-size: 11px; color: var(--gray); text-decoration: line-through; margin-left: 4px; }
+        .discount-badge {
+            background: var(--red); color: white; font-size: 10px; font-weight: 700;
+            padding: 3px 8px; border-radius: 8px; display: inline-block; margin-top: 3px;
+            animation: pulse 2s infinite;
+        }
 
         /* PRODUCT */
-        .cat-title { font-size: 15px; font-weight: 700; padding: 14px 14px 6px; color: #555; }
-        .product-item { display: flex; align-items: center; gap: 10px; margin: 2px 14px; padding: 10px 12px; background: white; border-radius: 10px; }
-        .product-emoji { font-size: 28px; width: 42px; text-align: center; }
+        .cat-title { font-size: 16px; font-weight: 700; padding: 14px 14px 4px; color: #555; }
+        .product-item {
+            display: flex; align-items: center; gap: 10px; margin: 3px 14px;
+            padding: 12px; background: white; border-radius: var(--radius-sm);
+            transition: var(--transition); box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+            animation: fadeIn 0.3s ease;
+        }
+        .product-item:active { background: #FFFDE7; transform: scale(0.98); }
+        .product-img {
+            width: 55px; height: 55px; background: #F8F8F8; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; font-size: 30px;
+        }
         .product-info { flex: 1; }
-        .product-name { font-size: 14px; font-weight: 600; }
-        .product-price { font-size: 14px; font-weight: 700; margin-top: 1px; }
-        .product-qty { display: flex; align-items: center; gap: 10px; }
-        .qty-btn { width: 30px; height: 30px; border-radius: 8px; border: none; font-size: 18px; font-weight: bold; cursor: pointer; background: #F2F2F7; color: var(--text); display: flex; align-items: center; justify-content: center; }
-        .qty-btn:active { background: #E5E5EA; }
-        .qty-num { font-size: 15px; font-weight: 600; min-width: 20px; text-align: center; }
+        .product-name { font-size: 14px; font-weight: 700; }
+        .product-desc { font-size: 11px; color: var(--gray); margin-top: 2px; }
+        .product-price { font-size: 15px; font-weight: 800; margin-top: 3px; }
+        .product-qty { display: flex; align-items: center; gap: 8px; }
+        .qty-btn {
+            width: 32px; height: 32px; border-radius: 10px; border: 2px solid #E8E8ED;
+            font-size: 16px; font-weight: 700; cursor: pointer; background: white;
+            transition: var(--transition); display: flex; align-items: center; justify-content: center;
+        }
+        .qty-btn:active { background: var(--yellow); border-color: var(--yellow); transform: scale(0.9); }
+        .qty-num { font-size: 15px; font-weight: 700; min-width: 24px; text-align: center; }
 
         /* PROFILE */
-        .profile-card { background: white; margin: 14px; border-radius: var(--radius); padding: 28px 20px; text-align: center; box-shadow: var(--shadow); }
+        .profile-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            margin: 14px; border-radius: var(--radius); padding: 30px 20px;
+            text-align: center; color: white; box-shadow: var(--shadow-md);
+        }
         .profile-avatar { font-size: 70px; }
-        .profile-avatar img { width: 80px; height: 80px; border-radius: 50%; }
-        .profile-name { font-size: 20px; font-weight: 700; margin-top: 8px; }
-        .profile-username { color: var(--gray); font-size: 15px; }
-        .profile-id { color: var(--gray); font-size: 11px; margin-top: 2px; }
+        .profile-avatar img { width: 80px; height: 80px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.5); }
+        .profile-name { font-size: 22px; font-weight: 800; margin-top: 10px; }
+        .profile-username { opacity: 0.8; font-size: 15px; }
+        .profile-id { opacity: 0.5; font-size: 11px; margin-top: 3px; }
 
         /* BOTTOM NAV */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 6px 0 18px; border-top: 1px solid var(--sep); z-index: 100; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; color: var(--gray); cursor: pointer; border: none; background: none; padding: 4px 10px; }
-        .nav-item.active { color: var(--text); }
-        .nav-icon { font-size: 22px; position: relative; }
-        .cart-badge { background: var(--red); color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; position: absolute; top: -6px; right: -10px; display: none; }
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(20px);
+            display: flex; justify-content: space-around; padding: 6px 0 18px;
+            border-top: 1px solid var(--sep); z-index: 100;
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; gap: 3px;
+            font-size: 10px; color: var(--gray); cursor: pointer;
+            border: none; background: none; padding: 4px 10px; transition: var(--transition);
+        }
+        .nav-item.active { color: var(--text); font-weight: 600; }
+        .nav-icon { font-size: 22px; position: relative; transition: var(--transition); }
+        .nav-item.active .nav-icon { transform: scale(1.1); }
+        .cart-badge {
+            background: var(--red); color: white; font-size: 10px; font-weight: 700;
+            padding: 2px 7px; border-radius: 10px; position: absolute;
+            top: -6px; right: -10px; display: none; animation: bounceIn 0.3s ease;
+        }
 
         /* CART MODAL */
-        .cart-overlay { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-radius: 18px 18px 0 0; padding: 20px 16px; z-index: 200; box-shadow: 0 -4px 24px rgba(0,0,0,0.12); max-height: 60vh; overflow-y: auto; animation: slideUp .2s ease; }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .cart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-        .cart-close { font-size: 20px; cursor: pointer; background: none; border: none; color: var(--gray); }
-        .cart-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
+        .cart-overlay {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: white; border-radius: 20px 20px 0 0; padding: 20px 16px;
+            z-index: 200; box-shadow: 0 -4px 30px rgba(0,0,0,0.15);
+            max-height: 65vh; overflow-y: auto; animation: slideUp 0.3s ease;
+        }
+        .cart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .cart-close {
+            width: 32px; height: 32px; border-radius: 50%; background: #F2F2F7;
+            border: none; font-size: 16px; cursor: pointer; transition: var(--transition);
+        }
+        .cart-close:active { background: #E5E5EA; transform: scale(0.9); }
+        .cart-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 0; border-bottom: 1px solid #F5F5F5; animation: fadeIn 0.3s ease;
+        }
         .cart-item-info { display: flex; align-items: center; gap: 8px; }
-        .cart-item-qty { display: flex; align-items: center; gap: 8px; }
-        .order-btn { width: 100%; padding: 14px; background: var(--yellow); border: none; border-radius: 12px; font-size: 16px; font-weight: 700; margin-top: 14px; cursor: pointer; }
-        .order-btn:active { background: #E5C700; }
-        .total-row { display: flex; justify-content: space-between; font-size: 17px; font-weight: 700; padding: 12px 0 0; }
+        .cart-item-qty { display: flex; align-items: center; gap: 6px; }
+        .cart-item-price { font-weight: 700; margin-left: 8px; }
+        .order-btn {
+            width: 100%; padding: 15px; background: var(--yellow); color: #1a1a1a;
+            border: none; border-radius: var(--radius-sm); font-size: 16px; font-weight: 800;
+            margin-top: 16px; cursor: pointer; transition: var(--transition);
+        }
+        .order-btn:active { background: var(--yellow-dark); transform: scale(0.98); }
+        .total-row {
+            display: flex; justify-content: space-between; font-size: 18px;
+            font-weight: 800; padding: 14px 0 0; border-top: 2px solid #F5F5F5; margin-top: 10px;
+        }
         .empty-text { text-align: center; padding: 30px; color: var(--gray); font-size: 15px; }
     </style>
 </head>
@@ -118,14 +267,21 @@
         <input type="text" class="search-input" id="searchInput" placeholder="Do'kon yoki taom qidirish" oninput="doSearch(this.value)">
         <div class="search-results" id="searchResults"></div>
     </div>
-    <div class="section-title">🏪 Restoranlar</div>
+    <div class="chips-row" id="chipsRow">
+        <button class="chip active" onclick="filterStores('all', this)">🏪 Barchasi</button>
+        <button class="chip" onclick="filterStores('fast', this)">⚡ Tez</button>
+        <button class="chip" onclick="filterStores('rating', this)">⭐ Top</button>
+        <button class="chip" onclick="filterStores('new', this)">🆕 Yangi</button>
+    </div>
+    <div class="section-title" style="padding-top:0;">🏪 Restoranlar</div>
     <div class="stores-row" id="storesList"></div>
-    <div class="section-title" style="padding-top:8px;">🔥 Chegirmalar</div>
+    <div class="section-title">🔥 Chegirmalar</div>
     <div class="discount-grid" id="discountList"></div>
 </div>
 
 <!-- STORE -->
 <div class="page" id="page-store">
+    <div class="chips-row" id="storeChips" style="padding-top:10px;"></div>
     <div id="storeMenu"></div>
 </div>
 
@@ -137,7 +293,7 @@
         <div class="profile-username" id="profileUsername">---</div>
         <div class="profile-id" id="profileId">ID: ---</div>
     </div>
-    <div class="section-title" style="padding-top:4px;">📋 Buyurtmalar tarixi</div>
+    <div class="section-title">📋 Buyurtmalar tarixi</div>
     <div id="orderHistory" class="empty-text">Hozircha bo'sh</div>
 </div>
 
@@ -155,50 +311,82 @@ tg.ready();
 
 let cart = [];
 let currentStore = null;
+let storeFilter = 'all';
+let productFilter = 'all';
 
 const stores = [
-    { id: 1, name: "Lavash House", emoji: "🥙", time: "15-20 min", rating: "4.8" },
-    { id: 2, name: "Burger King", emoji: "🍔", time: "20-25 min", rating: "4.6" },
-    { id: 3, name: "Pizza Time", emoji: "🍕", time: "25-30 min", rating: "4.9" },
-    { id: 4, name: "Sushi Wok", emoji: "🍣", time: "30-35 min", rating: "4.7" },
+    { id: 1, name: "Lavash House", emoji: "🥙", time: "15-20 min", rating: "4.8", tags: ["fast", "rating"] },
+    { id: 2, name: "Burger King", emoji: "🍔", time: "20-25 min", rating: "4.6", tags: ["fast"] },
+    { id: 3, name: "Pizza Time", emoji: "🍕", time: "25-30 min", rating: "4.9", tags: ["rating"] },
+    { id: 4, name: "Sushi Wok", emoji: "🍣", time: "30-35 min", rating: "4.7", tags: ["new"] },
+    { id: 5, name: "Doner House", emoji: "🥩", time: "10-15 min", rating: "4.5", tags: ["fast", "new"] },
 ];
 
 const allProducts = {
     1: [
-        { id: 1, name: "Lavash mol go'sht", price: 28000, emoji: "🥙", cat: "Lavash" },
-        { id: 2, name: "Lavash tovuqli", price: 25000, emoji: "🌯", cat: "Lavash" },
-        { id: 3, name: "Cola 0.5L", price: 8000, emoji: "🥤", cat: "Ichimliklar" },
+        { id: 1, name: "Lavash mol go'sht", price: 28000, emoji: "🥙", cat: "Lavash", desc: "Mazali mol go'shti bilan" },
+        { id: 2, name: "Lavash tovuqli", price: 25000, emoji: "🌯", cat: "Lavash", desc: "Tovuq filesi bilan" },
+        { id: 3, name: "Cola 0.5L", price: 8000, emoji: "🥤", cat: "Ichimliklar", desc: "Sovuq ichimlik" },
     ],
     2: [
-        { id: 4, name: "Gamburger", price: 22000, emoji: "🍔", cat: "Burger" },
-        { id: 5, name: "Chizburger", price: 25000, emoji: "🍔", cat: "Burger" },
-        { id: 10, name: "Pepsi 0.5L", price: 8000, emoji: "🥤", cat: "Ichimliklar" },
+        { id: 4, name: "Gamburger", price: 22000, emoji: "🍔", cat: "Burger", desc: "Klassik gamburger" },
+        { id: 5, name: "Chizburger", price: 25000, emoji: "🍔", cat: "Burger", desc: "Pishloqli burger" },
     ],
     3: [
-        { id: 6, name: "Pepperoni", price: 45000, emoji: "🍕", cat: "Pitsa" },
-        { id: 7, name: "Margarita", price: 38000, emoji: "🍕", cat: "Pitsa" },
+        { id: 6, name: "Pepperoni", price: 45000, emoji: "🍕", cat: "Pitsa", desc: "Pepperoni kolbasa" },
+        { id: 7, name: "Margarita", price: 38000, emoji: "🍕", cat: "Pitsa", desc: "Pomidor va pishloq" },
     ],
     4: [
-        { id: 8, name: "Filadelfiya", price: 55000, emoji: "🍣", cat: "Sushi" },
-        { id: 9, name: "Kaliforniya", price: 48000, emoji: "🍣", cat: "Sushi" },
+        { id: 8, name: "Filadelfiya", price: 55000, emoji: "🍣", cat: "Sushi", desc: "Losos bilan" },
+        { id: 9, name: "Kaliforniya", price: 48000, emoji: "🍣", cat: "Sushi", desc: "Avakado bilan" },
+    ],
+    5: [
+        { id: 10, name: "Doner katta", price: 22000, emoji: "🥩", cat: "Doner", desc: "Go'shtli doner" },
+        { id: 11, name: "Doner mini", price: 16000, emoji: "🌮", cat: "Doner", desc: "Kichik doner" },
     ],
 };
 
 const discounts = [
-    { name: "Lavash mol go'sht", oldPrice: 32000, price: 25000, emoji: "🥙", badge: "-22%" },
+    { name: "Lavash", oldPrice: 32000, price: 25000, emoji: "🥙", badge: "-22%" },
     { name: "Gamburger", oldPrice: 28000, price: 19000, emoji: "🍔", badge: "-32%" },
+    { name: "Pepsi 1L", oldPrice: 14000, price: 9000, emoji: "🥤", badge: "-36%" },
+    { name: "Hot-Dog", oldPrice: 18000, price: 12000, emoji: "🌭", badge: "-33%" },
 ];
 
-// NAVIGATION
 function showPage(p) {
-    document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(x => { x.classList.remove('active'); });
     const pg = document.getElementById('page-' + p);
     if (pg) pg.classList.add('active');
+    
     document.getElementById('mainHeader').classList.toggle('hidden', p === 'store');
     document.getElementById('storeHeader').classList.toggle('hidden', p !== 'store');
+    
     document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
     if (p === 'home') document.getElementById('navHome').classList.add('active');
     if (p === 'profile') { document.getElementById('navProfile').classList.add('active'); renderProfile(); }
+}
+
+function filterStores(filter, btn) {
+    storeFilter = filter;
+    document.querySelectorAll('#chipsRow .chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    renderStores();
+}
+
+function renderStores() {
+    let filtered = stores;
+    if (storeFilter === 'fast') filtered = stores.filter(s => s.tags.includes('fast'));
+    if (storeFilter === 'rating') filtered = stores.filter(s => s.tags.includes('rating'));
+    if (storeFilter === 'new') filtered = stores.filter(s => s.tags.includes('new'));
+    
+    document.getElementById('storesList').innerHTML = filtered.map(s => `
+        <div class="store-card" onclick="openStore(${s.id})">
+            <div class="store-icon">${s.emoji}</div>
+            <div class="store-name">${s.name}</div>
+            <div class="store-meta">🕐 ${s.time}</div>
+            <span class="store-badge">⭐ ${s.rating}</span>
+        </div>
+    `).join('');
 }
 
 function openStore(id) {
@@ -206,45 +394,50 @@ function openStore(id) {
     if (!currentStore) return;
     document.getElementById('storeTitle').textContent = currentStore.emoji + ' ' + currentStore.name;
     showPage('store');
-    renderStoreMenu(id);
+    renderStoreFilters();
+    renderStoreMenu();
 }
 
-// PRODUCT QTY
-function getCartQty(pid) {
-    const item = cart.find(x => x.id === pid);
-    return item ? item.qty : 0;
+function renderStoreFilters() {
+    const products = allProducts[currentStore.id] || [];
+    const cats = [...new Set(products.map(p => p.cat))];
+    document.getElementById('storeChips').innerHTML = 
+        `<button class="chip active" onclick="filterProducts('all', this)">🍽 Barchasi</button>` +
+        cats.map(c => `<button class="chip" onclick="filterProducts('${c}', this)">${c}</button>`).join('');
 }
 
-function updateCart(pid, sid, delta) {
-    const p = allProducts[sid]?.find(x => x.id === pid);
-    if (!p) return;
-    const ex = cart.find(x => x.id === pid);
-    if (ex) {
-        ex.qty += delta;
-        if (ex.qty <= 0) cart = cart.filter(x => x.id !== pid);
-    } else if (delta > 0) {
-        cart.push({ ...p, qty: 1 });
-    }
-    updateBadge();
-    if (currentStore && currentStore.id === sid) renderStoreMenu(sid);
+let currentCat = 'all';
+
+function filterProducts(cat, btn) {
+    currentCat = cat;
+    document.querySelectorAll('#storeChips .chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    renderStoreMenu();
 }
 
-function renderStoreMenu(storeId) {
-    const prods = allProducts[storeId] || [];
+function renderStoreMenu() {
+    let products = allProducts[currentStore.id] || [];
+    if (currentCat !== 'all') products = products.filter(p => p.cat === currentCat);
+    
     const cats = {};
-    prods.forEach(p => { if (!cats[p.cat]) cats[p.cat] = []; cats[p.cat].push(p); });
+    products.forEach(p => { if (!cats[p.cat]) cats[p.cat] = []; cats[p.cat].push(p); });
+    
     let h = '';
     for (const [c, items] of Object.entries(cats)) {
-        h += `<div class="cat-title">${c}</div>`;
+        if (currentCat === 'all') h += `<div class="cat-title">${c}</div>`;
         items.forEach(p => {
             const q = getCartQty(p.id);
             h += `<div class="product-item">
-                <div class="product-emoji">${p.emoji}</div>
-                <div class="product-info"><div class="product-name">${p.name}</div><div class="product-price">${p.price.toLocaleString()} so'm</div></div>
+                <div class="product-img">${p.emoji}</div>
+                <div class="product-info">
+                    <div class="product-name">${p.name}</div>
+                    <div class="product-desc">${p.desc || ''}</div>
+                    <div class="product-price">${p.price.toLocaleString()} so'm</div>
+                </div>
                 <div class="product-qty">
-                    <button class="qty-btn" onclick="updateCart(${p.id},${storeId},-1)">−</button>
+                    <button class="qty-btn" onclick="updateCart(${p.id},${currentStore.id},-1)">−</button>
                     <span class="qty-num">${q}</span>
-                    <button class="qty-btn" onclick="updateCart(${p.id},${storeId},1)">+</button>
+                    <button class="qty-btn" onclick="updateCart(${p.id},${currentStore.id},1)">+</button>
                 </div>
             </div>`;
         });
@@ -252,20 +445,31 @@ function renderStoreMenu(storeId) {
     document.getElementById('storeMenu').innerHTML = h;
 }
 
+function getCartQty(pid) { const item = cart.find(x => x.id === pid); return item ? item.qty : 0; }
+
+function updateCart(pid, sid, delta) {
+    const p = allProducts[sid]?.find(x => x.id === pid);
+    if (!p) return;
+    const ex = cart.find(x => x.id === pid);
+    if (ex) { ex.qty += delta; if (ex.qty <= 0) cart = cart.filter(x => x.id !== pid); }
+    else if (delta > 0) cart.push({ ...p, qty: 1 });
+    updateBadge();
+    if (currentStore && currentStore.id === sid) renderStoreMenu();
+}
+
 function updateBadge() {
     const c = cart.reduce((s,i) => s + i.qty, 0);
     const b = document.getElementById('cartBadge');
     b.textContent = c;
-    b.style.display = c > 0 ? 'inline-block' : 'none';
+    if (c > 0 && b.style.display !== 'inline-block') { b.style.display = 'inline-block'; }
+    else if (c <= 0) b.style.display = 'none';
 }
 
-// CART
 function openCart() {
     if (!cart.length) { tg.showAlert("Savat bo'sh!"); return; }
     const t = cart.reduce((s,i) => s + i.price*i.qty, 0);
     const d = document.createElement('div');
-    d.className = 'cart-overlay';
-    d.id = 'cartOverlay';
+    d.className = 'cart-overlay'; d.id = 'cartOverlay';
     d.innerHTML = `
         <div class="cart-header"><strong>🛒 Savat</strong><button class="cart-close" onclick="closeCart()">✕</button></div>
         ${cart.map(i => `<div class="cart-item">
@@ -274,7 +478,7 @@ function openCart() {
                 <button class="qty-btn" onclick="updateCartFromModal(${i.id},-1)">−</button>
                 <span class="qty-num">${i.qty}</span>
                 <button class="qty-btn" onclick="updateCartFromModal(${i.id},1)">+</button>
-                <span style="font-weight:700;margin-left:8px;">${(i.price*i.qty).toLocaleString()} so'm</span>
+                <span class="cart-item-price">${(i.price*i.qty).toLocaleString()} so'm</span>
             </div>
         </div>`).join('')}
         <div class="total-row"><span>Jami</span><span>${t.toLocaleString()} so'm</span></div>
@@ -282,10 +486,7 @@ function openCart() {
     document.body.appendChild(d);
 }
 
-function closeCart() {
-    const d = document.getElementById('cartOverlay');
-    if (d) d.remove();
-}
+function closeCart() { document.getElementById('cartOverlay')?.remove(); }
 
 function updateCartFromModal(pid, delta) {
     const ex = cart.find(x => x.id === pid);
@@ -294,25 +495,16 @@ function updateCartFromModal(pid, delta) {
     if (ex.qty <= 0) cart = cart.filter(x => x.id !== pid);
     updateBadge();
     closeCart();
-    setTimeout(openCart, 50);
+    if (cart.length) setTimeout(openCart, 50);
 }
 
 function submitOrder() {
     const t = cart.reduce((s,i) => s + i.price*i.qty, 0);
     const items = cart.map(i => `${i.name} x${i.qty}`).join(', ');
-
-    tg.sendData(JSON.stringify({
-        action: "order",
-        items,
-        total: t
-    }));
-    cart = [];
-    updateBadge();
-    closeCart();
-    tg.close();
+    tg.sendData(JSON.stringify({ action: "order", items, total: t }));
+    cart = []; updateBadge(); closeCart(); tg.close();
 }
 
-// SEARCH
 function doSearch(q) {
     const d = document.getElementById('searchResults');
     if (q.length < 2) { d.style.display = 'none'; return; }
@@ -322,7 +514,7 @@ function doSearch(q) {
     for (const [sid, prods] of Object.entries(allProducts)) {
         prods.filter(p => p.name.toLowerCase().includes(ql)).forEach(p => found.push({ t: 'product', ...p, sid: +sid, sname: stores.find(s => s.id == sid)?.name }));
     }
-    d.innerHTML = found.length ? found.map(f => f.t === 'store' ?
+    d.innerHTML = found.length ? found.map(f => f.t === 'store' ? 
         `<div class="search-item" onclick="openStore(${f.id});d.style.display='none';document.getElementById('searchInput').value='';"><span class="search-emoji">${f.emoji}</span><div><div class="search-name">${f.name}</div><div class="search-sub">🕐 ${f.time} · ⭐ ${f.rating}</div></div></div>` :
         `<div class="search-item" onclick="openStore(${f.sid});d.style.display='none';document.getElementById('searchInput').value='';"><span class="search-emoji">${f.emoji}</span><div><div class="search-name">${f.name}</div><div class="search-sub">${f.sname} · ${f.price.toLocaleString()} so'm</div></div></div>`
     ).join('') : '<div class="empty-text">Topilmadi</div>';
@@ -333,7 +525,7 @@ function renderProfile() {
     const u = tg.initDataUnsafe?.user;
     if (u) {
         document.getElementById('profileName').textContent = u.first_name + (u.last_name ? ' ' + u.last_name : '');
-        document.getElementById('profileUsername').textContent = u.username ? '@' + u.username : 'username yo\'q';
+        document.getElementById('profileUsername').textContent = u.username ? '@' + u.username : '';
         document.getElementById('profileId').textContent = 'ID: ' + u.id;
         if (u.photo_url) {
             document.getElementById('profileAvatar').innerHTML = `<img src="${u.photo_url}">`;
@@ -349,10 +541,8 @@ document.addEventListener('click', e => {
 });
 
 // INIT
-document.getElementById('storesList').innerHTML = stores.map(s =>
-    `<div class="store-card" onclick="openStore(${s.id})"><div class="store-icon">${s.emoji}</div><div class="store-name">${s.name}</div><div class="store-meta">🕐 ${s.time} · ⭐ ${s.rating}</div></div>`
-).join('');
-document.getElementById('discountList').innerHTML = discounts.map(d =>
+renderStores();
+document.getElementById('discountList').innerHTML = discounts.map(d => 
     `<div class="discount-card"><div class="discount-img">${d.emoji}</div><div class="discount-body"><div class="discount-name">${d.name}</div><div class="discount-price">${d.price.toLocaleString()} so'm<span class="discount-old">${d.oldPrice.toLocaleString()}</span></div><span class="discount-badge">${d.badge}</span></div></div>`
 ).join('');
 updateBadge();
