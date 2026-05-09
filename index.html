@@ -2,306 +2,546 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🍔 Fast Food</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>🍔 Fast Food Premium</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --yellow: #FFD700; --yellow-dark: #E5C700;
-            --red: #FF3B30; --green: #34C759;
-            --bg: #F2F2F7; --card: #FFFFFF; --text: #1C1C1E;
-            --gray: #8E8E93; --sep: #E5E5EA;
-            --radius: 16px; --radius-sm: 12px;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --primary: #007AFF;
+            --secondary: #FF3B30;
+            --success: #34C759;
+            --bg: #F2F2F7;
+            --card: #FFFFFF;
+            --text-main: #000000;
+            --text-muted: #8E8E93;
+            --border: rgba(60, 60, 67, 0.29);
+            --search-bg: rgba(118, 118, 128, 0.12);
+            --nav-bg: rgba(242, 242, 247, 0.85);
+            --radius-lg: 20px;
+            --radius-md: 16px;
+            --radius-sm: 12px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
             --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-            --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
-            --transition: 0.2s cubic-bezier(0.25, 0.8, 0.25, 1.2);
+            --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --transition: all 0.3s ease;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #000000;
+                --card: #1C1C1E;
+                --text-main: #FFFFFF;
+                --text-muted: #EBEBF5;
+                --border: rgba(84, 84, 88, 0.65);
+                --search-bg: rgba(118, 118, 128, 0.24);
+                --nav-bg: rgba(28, 28, 30, 0.85);
+            }
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font); -webkit-tap-highlight-color: transparent; }
+        html { scroll-behavior: smooth; }
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            padding-bottom: 80px;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-font-smoothing: antialiased;
+            background-color: var(--bg);
+            color: var(--text-main);
+            padding-bottom: 90px;
+            padding-top: env(safe-area-inset-top);
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
-        .page { display: none; animation: fadeIn 0.3s ease; }
-        .page.active { display: block; }
+        /* Animations */
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .page { display: none; }
+        .page.active { display: block; animation: fadeSlide 0.35s cubic-bezier(0.25, 0.1, 0.25, 1); }
         .hidden { display: none !important; }
 
-        /* ANIMATIONS */
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
-        @keyframes bounceIn { 0% { transform: scale(0); opacity: 0; } 60% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
+        .clickable { cursor: pointer; transition: transform 0.2s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.2s ease; }
+        .clickable:active { transform: scale(0.97); opacity: 0.8; }
 
         /* HEADER */
         .header {
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            padding: 14px 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
             position: sticky; top: 0; z-index: 100;
-            box-shadow: 0 2px 10px rgba(255,165,0,0.2);
+            background: var(--nav-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            padding: 16px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 0.5px solid var(--border);
         }
-        .header h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; color: #1a1a1a; }
-        .header-avatar {
-            width: 38px; height: 38px; border-radius: 50%;
-            background: white; display: flex; align-items: center; justify-content: center;
-            font-size: 18px; overflow: hidden; cursor: pointer; border: 2px solid rgba(0,0,0,0.1);
-            transition: var(--transition);
-        }
-        .header-avatar:active { transform: scale(0.9); }
-        .header-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-        .store-header {
-            background: white; padding: 12px 16px; display: flex; align-items: center; gap: 12px;
-            position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--sep);
-        }
-        .back-btn {
-            background: none; border: none; font-size: 22px; cursor: pointer;
-            padding: 8px; transition: var(--transition); border-radius: 50%;
-        }
-        .back-btn:active { background: #f0f0f0; transform: scale(0.9); }
-        .store-title { font-weight: 700; font-size: 17px; }
-
-        /* SEARCH */
-        .search-box { padding: 10px 14px; position: relative; }
-        .search-input {
-            width: 100%; padding: 12px 40px; border: none; border-radius: var(--radius-sm);
-            background: #E8E8ED; font-size: 15px; transition: var(--transition);
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="%238E8E93" stroke-width="2.5"><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>');
-            background-repeat: no-repeat; background-position: 12px center;
-        }
-        .search-input:focus { background: white; box-shadow: 0 0 0 3px rgba(255,215,0,0.3); outline: none; }
-        .search-results {
-            display: none; position: absolute; left: 14px; right: 14px; top: 52px;
-            background: white; border-radius: var(--radius); box-shadow: var(--shadow-lg);
-            max-height: 300px; overflow-y: auto; z-index: 200; animation: fadeIn 0.2s ease;
-        }
-        .search-item {
-            display: flex; align-items: center; gap: 10px; padding: 12px 14px;
-            cursor: pointer; transition: background 0.15s;
-        }
-        .search-item:active { background: #f5f5f5; }
-        .search-emoji { font-size: 24px; width: 35px; text-align: center; }
-        .search-name { font-weight: 600; font-size: 14px; }
-        .search-sub { font-size: 12px; color: var(--gray); }
-
-        /* CATEGORY CHIPS */
-        .chips-row {
-            display: flex; gap: 8px; padding: 6px 14px 12px; overflow-x: auto;
-            scrollbar-width: none; -webkit-overflow-scrolling: touch;
-        }
-        .chips-row::-webkit-scrollbar { display: none; }
-        .chip {
-            padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600;
-            white-space: nowrap; cursor: pointer; border: none;
-            background: var(--card); color: var(--text);
-            box-shadow: var(--shadow-sm); transition: var(--transition);
-        }
-        .chip.active { background: var(--yellow); color: #1a1a1a; }
-        .chip:active { transform: scale(0.95); }
-
-        /* SECTIONS */
-        .section-title { font-size: 20px; font-weight: 700; padding: 16px 14px 6px; }
-        .stores-row {
-            display: flex; gap: 12px; overflow-x: auto; padding: 4px 14px 8px;
-            scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
-        }
-        .stores-row::-webkit-scrollbar { display: none; }
+        .header-brand { display: flex; align-items: center; gap: 8px; }
+        .header-logo { font-size: 24px; }
+        .header-title { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
         
-        .store-card {
-            min-width: 145px; background: var(--card); border-radius: var(--radius);
-            padding: 18px 14px; text-align: center; box-shadow: var(--shadow-sm);
-            cursor: pointer; scroll-snap-align: start; transition: var(--transition);
-            border: 1px solid transparent;
+        .header-user {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: var(--search-bg); display: flex; align-items: center; justify-content: center;
+            overflow: hidden; 
         }
-        .store-card:hover { box-shadow: var(--shadow-md); border-color: var(--yellow); }
-        .store-card:active { transform: scale(0.96); background: #FFFDE7; }
-        .store-icon { font-size: 40px; transition: var(--transition); }
-        .store-card:active .store-icon { animation: pulse 0.3s ease; }
-        .store-name { font-size: 14px; font-weight: 700; margin-top: 8px; }
-        .store-meta { font-size: 11px; color: var(--gray); margin-top: 3px; }
-        .store-badge {
-            display: inline-block; background: var(--green); color: white;
-            font-size: 10px; padding: 2px 8px; border-radius: 10px; margin-top: 4px;
+        .header-user img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* STORIES */
+        .stories-wrapper {
+            padding: 16px 0 8px 20px;
+            display: flex; gap: 12px; overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none;
+        }
+        .stories-wrapper::-webkit-scrollbar { display: none; }
+        .story-card {
+            min-width: 100px; height: 130px; border-radius: var(--radius-md);
+            position: relative; overflow: hidden; scroll-snap-align: start;
+        }
+        .story-bg {
+            position: absolute; inset: 0; background-size: cover; background-position: center;
+        }
+        .story-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0) 40%, rgba(0,0,0,0.6) 100%);
+            display: flex; align-items: flex-end; padding: 10px;
+        }
+        .story-title { color: white; font-size: 13px; font-weight: 600; line-height: 1.2; letter-spacing: -0.2px; }
+        
+        /* SEARCH */
+        .search-container { padding: 8px 20px 16px; }
+        .search-box {
+            display: flex; align-items: center;
+            background: var(--search-bg);
+            border-radius: 10px; padding: 8px 12px;
+        }
+        .search-icon {
+            margin-right: 8px; opacity: 0.6;
+        }
+        .search-icon svg { width: 16px; height: 16px; fill: var(--text-main); }
+        .search-input {
+            width: 100%; border: none; background: transparent;
+            font-size: 17px; color: var(--text-main); font-family: var(--font);
+            outline: none;
+        }
+        .search-input::placeholder { color: var(--text-muted); opacity: 0.8; }
+
+        /* CATEGORIES (Chips) */
+        .categories {
+            display: flex; gap: 8px; padding: 0 20px 16px; overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .categories::-webkit-scrollbar { display: none; }
+        .cat-btn {
+            padding: 8px 16px; border-radius: 100px; border: none;
+            background: var(--search-bg); color: var(--text-main);
+            font-size: 15px; font-weight: 500; white-space: nowrap;
+        }
+        .cat-btn.active { background: var(--primary); color: #FFF; }
+
+        /* SECTION TITLE */
+        .section-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px 20px 12px;
+        }
+        .section-title { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
+        .section-link { color: var(--primary); font-size: 15px; font-weight: 400; text-decoration: none; }
+
+        /* RESTAURANTS / ITEMS GRID */
+        .grid-container {
+            display: grid; grid-template-columns: repeat(2, 1fr);
+            gap: 16px; padding: 0 20px 20px;
+        }
+        .item-card {
+            background: var(--card); border-radius: var(--radius-md); overflow: hidden;
+            box-shadow: var(--shadow-sm); 
+        }
+        .item-img-wrap {
+            height: 120px; background: var(--search-bg);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 50px; position: relative;
+        }
+        .item-fav {
+            position: absolute; top: 8px; right: 8px;
+            width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: center;
+        }
+        @media (prefers-color-scheme: dark) { .item-fav { background: rgba(0,0,0,0.5); } }
+        .item-fav svg { width: 14px; height: 14px; fill: none; stroke: var(--text-main); stroke-width: 2; }
+        .item-fav.active svg { fill: var(--secondary); stroke: var(--secondary); }
+        
+        .item-info { padding: 12px; }
+        .item-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; line-height: 1.2; letter-spacing: -0.2px; }
+        .item-meta { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+        .item-rating { color: var(--text-main); font-weight: 600; display: flex; align-items: center; gap: 2px; }
+        .item-rating svg { width: 12px; height: 12px; fill: var(--primary); }
+        .item-bottom { display: flex; justify-content: space-between; align-items: center; }
+        .item-price { font-size: 15px; font-weight: 600; color: var(--text-main); }
+        
+        .add-btn {
+            width: 32px; height: 32px; border-radius: 10px; border: none;
+            background: var(--search-bg); color: var(--primary); font-size: 20px; font-weight: 500;
+            display: flex; align-items: center; justify-content: center;
         }
 
-        /* DISCOUNTS */
-        .discount-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 14px; }
-        .discount-card {
-            background: var(--card); border-radius: var(--radius); overflow: hidden;
-            box-shadow: var(--shadow-sm); cursor: pointer; transition: var(--transition);
+        /* PRODUCT LIST (Store Menu) */
+        .menu-list { padding: 0 20px; }
+        .menu-item {
+            display: flex; gap: 14px; padding: 16px 0;
+            border-bottom: 0.5px solid var(--border);
         }
-        .discount-card:active { transform: scale(0.97); box-shadow: var(--shadow-md); }
-        .discount-img {
-            height: 85px; background: linear-gradient(135deg, #FF6B6B, #FF4757);
-            display: flex; align-items: center; justify-content: center; font-size: 42px;
+        .menu-item:last-child { border-bottom: none; }
+        .menu-img {
+            width: 80px; height: 80px; border-radius: var(--radius-sm); background: var(--search-bg);
+            display: flex; align-items: center; justify-content: center; font-size: 40px;
         }
-        .discount-body { padding: 10px 12px; }
-        .discount-name { font-size: 13px; font-weight: 700; }
-        .discount-price { font-size: 16px; font-weight: 800; color: var(--red); }
-        .discount-old { font-size: 11px; color: var(--gray); text-decoration: line-through; margin-left: 4px; }
-        .discount-badge {
-            background: var(--red); color: white; font-size: 10px; font-weight: 700;
-            padding: 3px 8px; border-radius: 8px; display: inline-block; margin-top: 3px;
-            animation: pulse 2s infinite;
-        }
-
-        /* PRODUCT */
-        .cat-title { font-size: 16px; font-weight: 700; padding: 14px 14px 4px; color: #555; }
-        .product-item {
-            display: flex; align-items: center; gap: 10px; margin: 3px 14px;
-            padding: 12px; background: white; border-radius: var(--radius-sm);
-            transition: var(--transition); box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-            animation: fadeIn 0.3s ease;
-        }
-        .product-item:active { background: #FFFDE7; transform: scale(0.98); }
-        .product-img {
-            width: 55px; height: 55px; background: #F8F8F8; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center; font-size: 30px;
-        }
-        .product-info { flex: 1; }
-        .product-name { font-size: 14px; font-weight: 700; }
-        .product-desc { font-size: 11px; color: var(--gray); margin-top: 2px; }
-        .product-price { font-size: 15px; font-weight: 800; margin-top: 3px; }
-        .product-qty { display: flex; align-items: center; gap: 8px; }
+        .menu-details { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .menu-name { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; }
+        .menu-desc { font-size: 13px; color: var(--text-muted); line-height: 1.3; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .menu-price-row { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+        .menu-price { font-size: 15px; font-weight: 600; }
+        
+        .qty-control { display: flex; align-items: center; gap: 12px; }
         .qty-btn {
-            width: 32px; height: 32px; border-radius: 10px; border: 2px solid #E8E8ED;
-            font-size: 16px; font-weight: 700; cursor: pointer; background: white;
-            transition: var(--transition); display: flex; align-items: center; justify-content: center;
+            width: 32px; height: 32px; border-radius: 10px; border: none;
+            background: var(--search-bg); color: var(--text-main); font-size: 18px; font-weight: 500;
+            display: flex; align-items: center; justify-content: center;
         }
-        .qty-btn:active { background: var(--yellow); border-color: var(--yellow); transform: scale(0.9); }
-        .qty-num { font-size: 15px; font-weight: 700; min-width: 24px; text-align: center; }
+        .qty-btn.plus { color: var(--primary); }
+        .qty-val { font-size: 15px; font-weight: 500; min-width: 20px; text-align: center; }
 
         /* PROFILE */
-        .profile-card {
+        .profile-header {
+            padding: 30px 20px; display: flex; flex-direction: column; align-items: center;
             background: linear-gradient(135deg, #667eea, #764ba2);
-            margin: 14px; border-radius: var(--radius); padding: 30px 20px;
-            text-align: center; color: white; box-shadow: var(--shadow-md);
+            color: #FFFFFF; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px;
         }
-        .profile-avatar { font-size: 70px; }
-        .profile-avatar img { width: 80px; height: 80px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.5); }
-        .profile-name { font-size: 22px; font-weight: 800; margin-top: 10px; }
-        .profile-username { opacity: 0.8; font-size: 15px; }
-        .profile-id { opacity: 0.5; font-size: 11px; margin-top: 3px; }
+        .profile-pic-wrap {
+            width: 90px; height: 90px; border-radius: 50%; padding: 3px;
+            background: rgba(255,255,255,0.3); margin-bottom: 16px;
+        }
+        .profile-pic {
+            width: 100%; height: 100%; border-radius: 50%;
+            background: #FFFFFF; display: flex; align-items: center; justify-content: center;
+            font-size: 40px; overflow: hidden; color: #764ba2;
+        }
+        .profile-pic img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-name { font-size: 22px; font-weight: 700; margin-bottom: 4px; letter-spacing: -0.4px; }
+        .profile-phone { font-size: 15px; opacity: 0.9; font-weight: 400; }
+        
+        .settings-list { padding: 20px; }
+        .setting-group {
+            background: var(--card); border-radius: var(--radius-md); overflow: hidden;
+            margin-bottom: 20px; box-shadow: var(--shadow-sm);
+        }
+        .setting-item {
+            display: flex; align-items: center; gap: 16px; padding: 16px;
+            border-bottom: 0.5px solid var(--border);
+        }
+        .setting-item:last-child { border-bottom: none; }
+        .setting-icon {
+            width: 32px; height: 32px; border-radius: 8px; background: var(--primary);
+            color: #FFF; display: flex; align-items: center; justify-content: center;
+        }
+        .setting-icon.red { background: var(--secondary); }
+        .setting-icon.green { background: var(--success); }
+        .setting-icon.gray { background: var(--text-muted); }
+        .setting-icon svg { width: 18px; height: 18px; fill: currentColor; }
+        .setting-info { flex: 1; }
+        .setting-title { font-size: 17px; font-weight: 400; letter-spacing: -0.3px; }
+        .setting-arrow { color: var(--text-muted); opacity: 0.5; }
+        .setting-arrow svg { width: 16px; height: 16px; fill: currentColor; }
 
         /* BOTTOM NAV */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
-            background: rgba(255,255,255,0.95); backdrop-filter: blur(20px);
-            display: flex; justify-content: space-around; padding: 6px 0 18px;
-            border-top: 1px solid var(--sep); z-index: 100;
+            background: var(--nav-bg);
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            display: flex; justify-content: space-around; padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+            border-top: 0.5px solid var(--border); z-index: 100;
         }
+        
         .nav-item {
-            display: flex; flex-direction: column; align-items: center; gap: 3px;
-            font-size: 10px; color: var(--gray); cursor: pointer;
-            border: none; background: none; padding: 4px 10px; transition: var(--transition);
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            font-size: 10px; font-weight: 500; color: var(--text-muted);
+            border: none; background: none; width: 64px;
         }
-        .nav-item.active { color: var(--text); font-weight: 600; }
-        .nav-icon { font-size: 22px; position: relative; transition: var(--transition); }
-        .nav-item.active .nav-icon { transform: scale(1.1); }
-        .cart-badge {
-            background: var(--red); color: white; font-size: 10px; font-weight: 700;
-            padding: 2px 7px; border-radius: 10px; position: absolute;
-            top: -6px; right: -10px; display: none; animation: bounceIn 0.3s ease;
+        .nav-item.active { color: var(--primary); }
+        .nav-icon { width: 24px; height: 24px; margin-bottom: 2px; }
+        .nav-icon svg { width: 100%; height: 100%; fill: currentColor; }
+
+        /* CART SHEET MODAL */
+        .cart-sheet-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+            z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        .cart-sheet-overlay.visible { opacity: 1; pointer-events: auto; }
+        .cart-sheet {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: var(--card); border-radius: 20px 20px 0 0;
+            padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+            transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+        }
+        .cart-sheet-overlay.visible .cart-sheet { transform: translateY(0); }
+        
+        .cart-handle {
+            width: 36px; height: 5px; border-radius: 3px; background: var(--border);
+            margin: -10px auto 20px;
+        }
+        .cart-summary-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; }
+        .cart-summary-row.total { font-weight: 700; font-size: 19px; border-top: 0.5px solid var(--border); padding-top: 12px; margin-top: 4px; margin-bottom: 24px; }
+        
+        .btn-primary {
+            background: var(--primary); color: #FFF; width: 100%; height: 54px;
+            border-radius: 14px; border: none; font-size: 17px; font-weight: 600;
+            display: flex; align-items: center; justify-content: center;
         }
 
-        /* CART MODAL */
-        .cart-overlay {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            background: white; border-radius: 20px 20px 0 0; padding: 20px 16px;
-            z-index: 200; box-shadow: 0 -4px 30px rgba(0,0,0,0.15);
-            max-height: 65vh; overflow-y: auto; animation: slideUp 0.3s ease;
+        /* STICKY CART STRIP (replaces float btn) */
+        .cart-strip {
+            position: fixed; bottom: calc(60px + env(safe-area-inset-bottom)); left: 16px; right: 16px;
+            background: var(--primary); color: #FFF; border-radius: 14px;
+            padding: 14px 20px; display: flex; align-items: center; justify-content: space-between;
+            z-index: 99; transform: translateY(150%); transition: transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+            box-shadow: var(--shadow-md);
         }
-        .cart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-        .cart-close {
-            width: 32px; height: 32px; border-radius: 50%; background: #F2F2F7;
-            border: none; font-size: 16px; cursor: pointer; transition: var(--transition);
+        .cart-strip.visible { transform: translateY(0); }
+        .cart-strip-title { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .cart-strip-badge {
+            background: #FFF; color: var(--primary); border-radius: 10px;
+            padding: 2px 8px; font-size: 13px; font-weight: 700;
+            animation: bounce 0.4s ease;
         }
-        .cart-close:active { background: #E5E5EA; transform: scale(0.9); }
-        .cart-item {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 12px 0; border-bottom: 1px solid #F5F5F5; animation: fadeIn 0.3s ease;
+        .cart-strip-price { font-size: 16px; font-weight: 600; }
+
+        /* STORE HEADER DETAILED */
+        .store-header-img {
+            height: 160px; background: linear-gradient(135deg, #FF9A9E, #FECFEF);
+            position: relative; display: flex; align-items: center; justify-content: center; font-size: 60px;
         }
-        .cart-item-info { display: flex; align-items: center; gap: 8px; }
-        .cart-item-qty { display: flex; align-items: center; gap: 6px; }
-        .cart-item-price { font-weight: 700; margin-left: 8px; }
-        .order-btn {
-            width: 100%; padding: 15px; background: var(--yellow); color: #1a1a1a;
-            border: none; border-radius: var(--radius-sm); font-size: 16px; font-weight: 800;
-            margin-top: 16px; cursor: pointer; transition: var(--transition);
+        .store-back-btn {
+            position: absolute; top: 16px; left: 16px;
+            width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: center;
+            border: none;
         }
-        .order-btn:active { background: var(--yellow-dark); transform: scale(0.98); }
-        .total-row {
-            display: flex; justify-content: space-between; font-size: 18px;
-            font-weight: 800; padding: 14px 0 0; border-top: 2px solid #F5F5F5; margin-top: 10px;
+        @media (prefers-color-scheme: dark) { .store-back-btn { background: rgba(0,0,0,0.5); } }
+        .store-back-btn svg { width: 16px; height: 16px; fill: var(--text-main); }
+        .store-info-card {
+            margin: -20px 20px 20px; background: var(--card); border-radius: var(--radius-md);
+            padding: 20px; box-shadow: var(--shadow-sm); position: relative; z-index: 10;
         }
-        .empty-text { text-align: center; padding: 30px; color: var(--gray); font-size: 15px; }
+        .store-info-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.4px; }
+        .store-info-meta { display: flex; gap: 16px; font-size: 13px; color: var(--text-muted); font-weight: 500; }
+        .store-info-meta div { display: flex; align-items: center; gap: 4px; }
+        .store-info-meta svg { width: 14px; height: 14px; fill: var(--text-muted); }
     </style>
 </head>
 <body>
 
-<!-- HOME HEADER -->
+<!-- MAIN HEADER -->
 <div class="header" id="mainHeader">
-    <h1>🍔 Fast Food</h1>
-    <button class="header-avatar" id="headerAvatar" onclick="showPage('profile')">👤</button>
+    <div class="header-brand">
+        <span class="header-logo">🍔</span>
+        <span class="header-title">Fast Food</span>
+    </div>
+    <div class="header-user clickable" id="headerAvatar" onclick="showPage('profile')">👤</div>
 </div>
 
-<!-- STORE HEADER -->
-<div class="store-header hidden" id="storeHeader">
-    <button class="back-btn" onclick="showPage('home')">←</button>
-    <span class="store-title" id="storeTitle"></span>
-</div>
-
-<!-- HOME -->
+<!-- PAGE: HOME -->
 <div class="page active" id="page-home">
-    <div class="search-box">
-        <input type="text" class="search-input" id="searchInput" placeholder="Do'kon yoki taom qidirish" oninput="doSearch(this.value)">
-        <div class="search-results" id="searchResults"></div>
+    <!-- Search -->
+    <div class="search-container">
+        <div class="search-box">
+            <div class="search-icon">
+                <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            </div>
+            <input type="text" class="search-input" id="searchInput" placeholder="Restoran yoki taom qidirish">
+        </div>
     </div>
-    <div class="chips-row" id="chipsRow">
-        <button class="chip active" onclick="filterStores('all', this)">🏪 Barchasi</button>
-        <button class="chip" onclick="filterStores('fast', this)">⚡ Tez</button>
-        <button class="chip" onclick="filterStores('rating', this)">⭐ Top</button>
-        <button class="chip" onclick="filterStores('new', this)">🆕 Yangi</button>
+
+    <!-- Stories / Promo Banners -->
+    <div class="stories-wrapper">
+        <div class="story-card clickable">
+            <div class="story-bg" style="background-image: url('https://images.unsplash.com/photo-1550547660-d9450f859349?w=300');"></div>
+            <div class="story-overlay"><span class="story-title">Burger Combo 20%</span></div>
+        </div>
+        <div class="story-card clickable">
+            <div class="story-bg" style="background-image: url('https://images.unsplash.com/photo-1513104890138-7c749659a591?w=300');"></div>
+            <div class="story-overlay"><span class="story-title">Yangi Pitsa</span></div>
+        </div>
+        <div class="story-card clickable">
+            <div class="story-bg" style="background-image: url('https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=300');"></div>
+            <div class="story-overlay"><span class="story-title">Bepul Yetkazish</span></div>
+        </div>
     </div>
-    <div class="section-title" style="padding-top:0;">🏪 Restoranlar</div>
-    <div class="stores-row" id="storesList"></div>
-    <div class="section-title">🔥 Chegirmalar</div>
-    <div class="discount-grid" id="discountList"></div>
+
+    <!-- Categories -->
+    <div class="categories" style="margin-top: 4px;">
+        <button class="cat-btn clickable active">Hammasi</button>
+        <button class="cat-btn clickable">Burgerlar</button>
+        <button class="cat-btn clickable">Lavash</button>
+        <button class="cat-btn clickable">Pitsa</button>
+        <button class="cat-btn clickable">Sushi</button>
+    </div>
+
+    <!-- Recommended Stores -->
+    <div class="section-header">
+        <div class="section-title">Tavsiya etamiz</div>
+        <a href="#" class="section-link">Barchasi</a>
+    </div>
+    <div class="grid-container" id="storesList">
+        <!-- JS generates stores here -->
+    </div>
+
+    <!-- Popular Items -->
+    <div class="section-header">
+        <div class="section-title">Ommabop taomlar</div>
+    </div>
+    <div class="grid-container" id="popularItems" style="padding-bottom: 40px;">
+        <!-- JS generates popular items -->
+    </div>
 </div>
 
-<!-- STORE -->
+<!-- PAGE: STORE DETAILED -->
 <div class="page" id="page-store">
-    <div class="chips-row" id="storeChips" style="padding-top:10px;"></div>
-    <div id="storeMenu"></div>
-</div>
-
-<!-- PROFILE -->
-<div class="page" id="page-profile">
-    <div class="profile-card">
-        <div class="profile-avatar" id="profileAvatar">👤</div>
-        <div class="profile-name" id="profileName">---</div>
-        <div class="profile-username" id="profileUsername">---</div>
-        <div class="profile-id" id="profileId">ID: ---</div>
+    <div class="store-header-img" id="storeHeaderImg">
+        <button class="store-back-btn clickable" onclick="showPage('home')">
+            <svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>
+        </button>
+        <span id="storeHeaderEmoji">🍔</span>
     </div>
-    <div class="section-title">📋 Buyurtmalar tarixi</div>
-    <div id="orderHistory" class="empty-text">Hozircha bo'sh</div>
+    <div class="store-info-card">
+        <div class="store-info-title" id="storeDetailedName">Restoran Nomi</div>
+        <div class="store-info-meta">
+            <div><svg viewBox="0 0 24 24" style="fill:var(--primary)"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg> <span id="storeDetailedRating">4.8</span></div>
+            <div><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/><path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg> <span id="storeDetailedTime">20-30 min</span></div>
+        </div>
+    </div>
+
+    <div class="categories" id="storeCategories">
+        <button class="cat-btn clickable active">Barchasi</button>
+        <button class="cat-btn clickable">Lavash</button>
+        <button class="cat-btn clickable">Burger</button>
+        <button class="cat-btn clickable">Ichimliklar</button>
+    </div>
+
+    <div class="menu-list" id="storeMenu" style="padding-bottom: 60px;">
+        <!-- JS generates menu items -->
+    </div>
 </div>
 
-<!-- BOTTOM NAV -->
+<!-- PAGE: PROFILE -->
+<div class="page" id="page-profile">
+    <div class="profile-header">
+        <div class="profile-pic-wrap">
+            <div class="profile-pic" id="profileAvatarBig">👤</div>
+        </div>
+        <div class="profile-name" id="profileName">Ism Familiya</div>
+        <div class="profile-phone" id="profilePhone">+998 •• ••• •• ••</div>
+    </div>
+
+    <div class="settings-list">
+        <div class="setting-group">
+            <div class="setting-item clickable">
+                <div class="setting-icon"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div>
+                <div class="setting-info">
+                    <div class="setting-title">Mening manzillarim</div>
+                </div>
+                <div class="setting-arrow"><svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg></div>
+            </div>
+            <div class="setting-item clickable">
+                <div class="setting-icon green"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+                <div class="setting-info">
+                    <div class="setting-title">Buyurtmalar tarixi</div>
+                </div>
+                <div class="setting-arrow"><svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg></div>
+            </div>
+            <div class="setting-item clickable">
+                <div class="setting-icon gray"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg></div>
+                <div class="setting-info">
+                    <div class="setting-title">To'lov usullari</div>
+                </div>
+                <div class="setting-arrow"><svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg></div>
+            </div>
+        </div>
+        
+        <div class="setting-group">
+            <div class="setting-item clickable">
+                <div class="setting-icon red"><svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/></svg></div>
+                <div class="setting-info">
+                    <div class="setting-title">Bildirishnomalar</div>
+                </div>
+                <div class="setting-arrow"><svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- BOTTOM NAVIGATION -->
 <div class="bottom-nav">
-    <button class="nav-item active" id="navHome" onclick="showPage('home')"><span class="nav-icon">🏠</span>Bosh</button>
-    <button class="nav-item" onclick="openCart()" style="position:relative;"><span class="nav-icon">🛒<span class="cart-badge" id="cartBadge">0</span></span>Savat</button>
-    <button class="nav-item" id="navProfile" onclick="showPage('profile')"><span class="nav-icon">👤</span>Profil</button>
+    <button class="nav-item clickable active" id="navHome" onclick="showPage('home')">
+        <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>
+        Bosh sahifa
+    </button>
+    <button class="nav-item clickable">
+        <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div>
+        Sevimlilar
+    </button>
+    <button class="nav-item clickable">
+        <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+        Buyurtmalar
+    </button>
+    <button class="nav-item clickable" id="navProfile" onclick="showPage('profile')">
+        <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+        Profil
+    </button>
+</div>
+
+<!-- STICKY CART STRIP -->
+<div class="cart-strip clickable" id="cartStrip" onclick="openCartSheet()">
+    <div class="cart-strip-title">
+        <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:#FFF"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+        Savat <span class="cart-strip-badge" id="cartStripQty">0</span>
+    </div>
+    <div class="cart-strip-price" id="cartStripTotal">0 so'm</div>
+</div>
+
+<!-- CART SHEET MODAL -->
+<div class="cart-sheet-overlay" id="cartSheetOverlay" onclick="closeCartSheet()">
+    <div class="cart-sheet" onclick="event.stopPropagation()">
+        <div class="cart-handle"></div>
+        <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 20px; letter-spacing: -0.4px;">Savat</h2>
+        
+        <div id="cartSheetItems" style="max-height: 40vh; overflow-y: auto; margin-bottom: 20px;">
+            <!-- JS generates cart items -->
+        </div>
+
+        <div class="cart-summary-row">
+            <span>Mahsulotlar:</span>
+            <span id="sheetSubtotal">0 so'm</span>
+        </div>
+        <div class="cart-summary-row">
+            <span>Yetkazish:</span>
+            <span>10 000 so'm</span>
+        </div>
+        <div class="cart-summary-row total">
+            <span>Jami:</span>
+            <span id="sheetTotal">0 so'm</span>
+        </div>
+        
+        <button class="btn-primary clickable" onclick="submitOrder()">Buyurtma berish</button>
+    </div>
 </div>
 
 <script>
@@ -309,244 +549,268 @@ const tg = window.Telegram.WebApp;
 tg.expand();
 tg.ready();
 
-let cart = [];
-let currentStore = null;
-let storeFilter = 'all';
-let productFilter = 'all';
+let cart = {};
+let currentStoreId = null;
 
+// Apply theme matching Telegram (iOS styles will adapt if variables match)
+const bgC = tg.themeParams.bg_color;
+const secBgC = tg.themeParams.secondary_bg_color;
+const txtC = tg.themeParams.text_color;
+if (bgC) {
+    document.documentElement.style.setProperty('--bg', bgC);
+    document.documentElement.style.setProperty('--nav-bg', bgC + 'D9'); // Add alpha for blur
+}
+if (secBgC) document.documentElement.style.setProperty('--card', secBgC);
+if (txtC) document.documentElement.style.setProperty('--text-main', txtC);
+
+// Mock Data
 const stores = [
-    { id: 1, name: "Lavash House", emoji: "🥙", time: "15-20 min", rating: "4.8", tags: ["fast", "rating"] },
-    { id: 2, name: "Burger King", emoji: "🍔", time: "20-25 min", rating: "4.6", tags: ["fast"] },
-    { id: 3, name: "Pizza Time", emoji: "🍕", time: "25-30 min", rating: "4.9", tags: ["rating"] },
-    { id: 4, name: "Sushi Wok", emoji: "🍣", time: "30-35 min", rating: "4.7", tags: ["new"] },
-    { id: 5, name: "Doner House", emoji: "🥩", time: "10-15 min", rating: "4.5", tags: ["fast", "new"] },
+    { id: 1, name: "Evos", emoji: "🥙", time: "15-20", rating: "4.8", type: "Fast Food", bg: "linear-gradient(135deg, #FF9A9E, #FECFEF)" },
+    { id: 2, name: "Oqtepa Lavash", emoji: "🌯", time: "20-25", rating: "4.6", type: "Fast Food", bg: "linear-gradient(135deg, #a18cd1, #fbc2eb)" },
+    { id: 3, name: "Bellissimo Pizza", emoji: "🍕", time: "30-40", rating: "4.9", type: "Pitseriya", bg: "linear-gradient(135deg, #f6d365, #fda085)" },
+    { id: 4, name: "KFC", emoji: "🍗", time: "15-25", rating: "4.7", type: "Tovuq", bg: "linear-gradient(135deg, #ff0844, #ffb199)" }
 ];
 
-const allProducts = {
+const menuItems = {
     1: [
-        { id: 1, name: "Lavash mol go'sht", price: 28000, emoji: "🥙", cat: "Lavash", desc: "Mazali mol go'shti bilan" },
-        { id: 2, name: "Lavash tovuqli", price: 25000, emoji: "🌯", cat: "Lavash", desc: "Tovuq filesi bilan" },
-        { id: 3, name: "Cola 0.5L", price: 8000, emoji: "🥤", cat: "Ichimliklar", desc: "Sovuq ichimlik" },
-    ],
-    2: [
-        { id: 4, name: "Gamburger", price: 22000, emoji: "🍔", cat: "Burger", desc: "Klassik gamburger" },
-        { id: 5, name: "Chizburger", price: 25000, emoji: "🍔", cat: "Burger", desc: "Pishloqli burger" },
-    ],
-    3: [
-        { id: 6, name: "Pepperoni", price: 45000, emoji: "🍕", cat: "Pitsa", desc: "Pepperoni kolbasa" },
-        { id: 7, name: "Margarita", price: 38000, emoji: "🍕", cat: "Pitsa", desc: "Pomidor va pishloq" },
-    ],
-    4: [
-        { id: 8, name: "Filadelfiya", price: 55000, emoji: "🍣", cat: "Sushi", desc: "Losos bilan" },
-        { id: 9, name: "Kaliforniya", price: 48000, emoji: "🍣", cat: "Sushi", desc: "Avakado bilan" },
-    ],
-    5: [
-        { id: 10, name: "Doner katta", price: 22000, emoji: "🥩", cat: "Doner", desc: "Go'shtli doner" },
-        { id: 11, name: "Doner mini", price: 16000, emoji: "🌮", cat: "Doner", desc: "Kichik doner" },
-    ],
+        { id: 101, name: "Lavash Standart", price: 28000, desc: "Mol go'shti, chips, bodring, pomidor, sous", emoji: "🥙", cat: "Lavash" },
+        { id: 102, name: "Lavash Tovuq", price: 26000, desc: "Tovuq filesi, chips, pishloq, maxsus sous", emoji: "🌯", cat: "Lavash" },
+        { id: 103, name: "Gamburger", price: 22000, desc: "Mol go'shti kotleti, salat bargi, sous", emoji: "🍔", cat: "Burger" },
+        { id: 104, name: "Coca-Cola 0.5L", price: 8000, desc: "Muzdek ichimlik", emoji: "🥤", cat: "Ichimlik" }
+    ]
 };
 
-const discounts = [
-    { name: "Lavash", oldPrice: 32000, price: 25000, emoji: "🥙", badge: "-22%" },
-    { name: "Gamburger", oldPrice: 28000, price: 19000, emoji: "🍔", badge: "-32%" },
-    { name: "Pepsi 1L", oldPrice: 14000, price: 9000, emoji: "🥤", badge: "-36%" },
-    { name: "Hot-Dog", oldPrice: 18000, price: 12000, emoji: "🌭", badge: "-33%" },
-];
-
-function showPage(p) {
-    document.querySelectorAll('.page').forEach(x => { x.classList.remove('active'); });
-    const pg = document.getElementById('page-' + p);
-    if (pg) pg.classList.add('active');
-    
-    document.getElementById('mainHeader').classList.toggle('hidden', p === 'store');
-    document.getElementById('storeHeader').classList.toggle('hidden', p !== 'store');
-    
-    document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
-    if (p === 'home') document.getElementById('navHome').classList.add('active');
-    if (p === 'profile') { document.getElementById('navProfile').classList.add('active'); renderProfile(); }
-}
-
-function filterStores(filter, btn) {
-    storeFilter = filter;
-    document.querySelectorAll('#chipsRow .chip').forEach(c => c.classList.remove('active'));
-    btn.classList.add('active');
-    renderStores();
-}
-
-function renderStores() {
-    let filtered = stores;
-    if (storeFilter === 'fast') filtered = stores.filter(s => s.tags.includes('fast'));
-    if (storeFilter === 'rating') filtered = stores.filter(s => s.tags.includes('rating'));
-    if (storeFilter === 'new') filtered = stores.filter(s => s.tags.includes('new'));
-    
-    document.getElementById('storesList').innerHTML = filtered.map(s => `
-        <div class="store-card" onclick="openStore(${s.id})">
-            <div class="store-icon">${s.emoji}</div>
-            <div class="store-name">${s.name}</div>
-            <div class="store-meta">🕐 ${s.time}</div>
-            <span class="store-badge">⭐ ${s.rating}</span>
+// Render Functions
+function renderHome() {
+    const storesHtml = stores.map(s => \`
+        <div class="item-card clickable" onclick="openStore(\${s.id})">
+            <div class="item-img-wrap" style="background: \${s.bg}">\${s.emoji}
+                <div class="item-fav" onclick="event.stopPropagation(); this.classList.toggle('active')">
+                    <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                </div>
+            </div>
+            <div class="item-info">
+                <div class="item-title">\${s.name}</div>
+                <div class="item-meta">
+                    <span class="item-rating"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg> \${s.rating}</span>
+                    <span>•</span>
+                    <span>\${s.time} min</span>
+                </div>
+                <div class="item-bottom">
+                    <span style="font-size: 13px; color: var(--text-muted); font-weight: 500;">\${s.type}</span>
+                </div>
+            </div>
         </div>
-    `).join('');
+    \`).join('');
+    document.getElementById('storesList').innerHTML = storesHtml;
+
+    const popHtml = menuItems[1].slice(0, 2).map(p => \`
+        <div class="item-card clickable" onclick="openStore(1)">
+            <div class="item-img-wrap">\${p.emoji}</div>
+            <div class="item-info">
+                <div class="item-title">\${p.name}</div>
+                <div class="item-bottom" style="margin-top: 8px;">
+                    <div class="item-price">\${p.price.toLocaleString()} so'm</div>
+                    <button class="add-btn clickable" onclick="event.stopPropagation(); updateCart(\${p.id}, 1)">+</button>
+                </div>
+            </div>
+        </div>
+    \`).join('');
+    document.getElementById('popularItems').innerHTML = popHtml;
 }
 
 function openStore(id) {
-    currentStore = stores.find(x => x.id === id);
-    if (!currentStore) return;
-    document.getElementById('storeTitle').textContent = currentStore.emoji + ' ' + currentStore.name;
+    const s = stores.find(x => x.id === id);
+    if (!s) return;
+    currentStoreId = id;
+    
+    document.getElementById('storeHeaderImg').style.background = s.bg;
+    document.getElementById('storeHeaderEmoji').textContent = s.emoji;
+    document.getElementById('storeDetailedName').textContent = s.name;
+    document.getElementById('storeDetailedRating').textContent = s.rating;
+    document.getElementById('storeDetailedTime').textContent = s.time + " min";
+    
+    renderStoreMenu(id);
     showPage('store');
-    renderStoreFilters();
-    renderStoreMenu();
 }
 
-function renderStoreFilters() {
-    const products = allProducts[currentStore.id] || [];
-    const cats = [...new Set(products.map(p => p.cat))];
-    document.getElementById('storeChips').innerHTML = 
-        `<button class="chip active" onclick="filterProducts('all', this)">🍽 Barchasi</button>` +
-        cats.map(c => `<button class="chip" onclick="filterProducts('${c}', this)">${c}</button>`).join('');
-}
-
-let currentCat = 'all';
-
-function filterProducts(cat, btn) {
-    currentCat = cat;
-    document.querySelectorAll('#storeChips .chip').forEach(c => c.classList.remove('active'));
-    btn.classList.add('active');
-    renderStoreMenu();
-}
-
-function renderStoreMenu() {
-    let products = allProducts[currentStore.id] || [];
-    if (currentCat !== 'all') products = products.filter(p => p.cat === currentCat);
-    
-    const cats = {};
-    products.forEach(p => { if (!cats[p.cat]) cats[p.cat] = []; cats[p.cat].push(p); });
-    
-    let h = '';
-    for (const [c, items] of Object.entries(cats)) {
-        if (currentCat === 'all') h += `<div class="cat-title">${c}</div>`;
-        items.forEach(p => {
-            const q = getCartQty(p.id);
-            h += `<div class="product-item">
-                <div class="product-img">${p.emoji}</div>
-                <div class="product-info">
-                    <div class="product-name">${p.name}</div>
-                    <div class="product-desc">${p.desc || ''}</div>
-                    <div class="product-price">${p.price.toLocaleString()} so'm</div>
+function renderStoreMenu(storeId) {
+    const items = menuItems[storeId] || menuItems[1];
+    const html = items.map(p => {
+        const q = cart[p.id]?.qty || 0;
+        return \`
+            <div class="menu-item">
+                <div class="menu-img">\${p.emoji}</div>
+                <div class="menu-details">
+                    <div>
+                        <div class="menu-name">\${p.name}</div>
+                        <div class="menu-desc">\${p.desc}</div>
+                    </div>
+                    <div class="menu-price-row">
+                        <div class="menu-price">\${p.price.toLocaleString()} so'm</div>
+                        \${q > 0 ? \`
+                        <div class="qty-control">
+                            <button class="qty-btn clickable" onclick="updateCart(\${p.id}, -1)">−</button>
+                            <span class="qty-val">\${q}</span>
+                            <button class="qty-btn plus clickable" onclick="updateCart(\${p.id}, 1)">+</button>
+                        </div>
+                        \` : \`
+                        <button class="add-btn clickable" onclick="updateCart(\${p.id}, 1)">+</button>
+                        \`}
+                    </div>
                 </div>
-                <div class="product-qty">
-                    <button class="qty-btn" onclick="updateCart(${p.id},${currentStore.id},-1)">−</button>
-                    <span class="qty-num">${q}</span>
-                    <button class="qty-btn" onclick="updateCart(${p.id},${currentStore.id},1)">+</button>
-                </div>
-            </div>`;
-        });
-    }
-    document.getElementById('storeMenu').innerHTML = h;
-}
-
-function getCartQty(pid) { const item = cart.find(x => x.id === pid); return item ? item.qty : 0; }
-
-function updateCart(pid, sid, delta) {
-    const p = allProducts[sid]?.find(x => x.id === pid);
-    if (!p) return;
-    const ex = cart.find(x => x.id === pid);
-    if (ex) { ex.qty += delta; if (ex.qty <= 0) cart = cart.filter(x => x.id !== pid); }
-    else if (delta > 0) cart.push({ ...p, qty: 1 });
-    updateBadge();
-    if (currentStore && currentStore.id === sid) renderStoreMenu();
-}
-
-function updateBadge() {
-    const c = cart.reduce((s,i) => s + i.qty, 0);
-    const b = document.getElementById('cartBadge');
-    b.textContent = c;
-    if (c > 0 && b.style.display !== 'inline-block') { b.style.display = 'inline-block'; }
-    else if (c <= 0) b.style.display = 'none';
-}
-
-function openCart() {
-    if (!cart.length) { tg.showAlert("Savat bo'sh!"); return; }
-    const t = cart.reduce((s,i) => s + i.price*i.qty, 0);
-    const d = document.createElement('div');
-    d.className = 'cart-overlay'; d.id = 'cartOverlay';
-    d.innerHTML = `
-        <div class="cart-header"><strong>🛒 Savat</strong><button class="cart-close" onclick="closeCart()">✕</button></div>
-        ${cart.map(i => `<div class="cart-item">
-            <div class="cart-item-info"><span>${i.emoji}</span><span>${i.name}</span></div>
-            <div class="cart-item-qty">
-                <button class="qty-btn" onclick="updateCartFromModal(${i.id},-1)">−</button>
-                <span class="qty-num">${i.qty}</span>
-                <button class="qty-btn" onclick="updateCartFromModal(${i.id},1)">+</button>
-                <span class="cart-item-price">${(i.price*i.qty).toLocaleString()} so'm</span>
             </div>
-        </div>`).join('')}
-        <div class="total-row"><span>Jami</span><span>${t.toLocaleString()} so'm</span></div>
-        <button class="order-btn" onclick="submitOrder()">📝 Buyurtma berish</button>`;
-    document.body.appendChild(d);
+        \`;
+    }).join('');
+    document.getElementById('storeMenu').innerHTML = html;
 }
 
-function closeCart() { document.getElementById('cartOverlay')?.remove(); }
+function updateCart(itemId, delta) {
+    const item = menuItems[currentStoreId || 1].find(x => x.id === itemId);
+    if (!item) return;
 
-function updateCartFromModal(pid, delta) {
-    const ex = cart.find(x => x.id === pid);
-    if (!ex) return;
-    ex.qty += delta;
-    if (ex.qty <= 0) cart = cart.filter(x => x.id !== pid);
-    updateBadge();
-    closeCart();
-    if (cart.length) setTimeout(openCart, 50);
+    if (!cart[itemId]) cart[itemId] = { ...item, qty: 0 };
+    cart[itemId].qty += delta;
+    
+    if (cart[itemId].qty <= 0) delete cart[itemId];
+    
+    updateCartUI();
+    if (document.getElementById('page-store').classList.contains('active')) {
+        renderStoreMenu(currentStoreId);
+    }
+}
+
+function updateCartUI() {
+    let totalQty = 0;
+    let totalPrice = 0;
+    for (const key in cart) {
+        totalQty += cart[key].qty;
+        totalPrice += cart[key].price * cart[key].qty;
+    }
+    
+    const strip = document.getElementById('cartStrip');
+    const badge = document.getElementById('cartStripQty');
+    
+    if (totalQty > 0) {
+        strip.classList.add('visible');
+        document.getElementById('cartStripTotal').textContent = totalPrice.toLocaleString() + " so'm";
+        
+        // Re-trigger bounce animation
+        badge.style.animation = 'none';
+        badge.offsetHeight; // trigger reflow
+        badge.style.animation = 'bounce 0.4s ease';
+        badge.textContent = totalQty;
+        
+        tg.MainButton.text = \`Savat - \${totalPrice.toLocaleString()} so'm\`;
+        tg.MainButton.show();
+    } else {
+        strip.classList.remove('visible');
+        tg.MainButton.hide();
+        closeCartSheet(); // close if open
+    }
+}
+
+function openCartSheet() {
+    const sheetOverlay = document.getElementById('cartSheetOverlay');
+    const itemsContainer = document.getElementById('cartSheetItems');
+    
+    let html = '';
+    let subtotal = 0;
+    for (const key in cart) {
+        const item = cart[key];
+        subtotal += item.price * item.qty;
+        html += \`
+            <div class="menu-item" style="padding: 12px 0;">
+                <div class="menu-details">
+                    <div class="menu-name" style="font-size: 15px;">\${item.name}</div>
+                    <div class="menu-price-row" style="margin-top: 4px;">
+                        <div class="menu-price" style="font-size: 14px;">\${(item.price * item.qty).toLocaleString()} so'm</div>
+                        <div class="qty-control">
+                            <button class="qty-btn clickable" style="width:28px;height:28px;font-size:16px" onclick="updateCart(\${item.id}, -1); openCartSheet();">−</button>
+                            <span class="qty-val" style="font-size:14px">\${item.qty}</span>
+                            <button class="qty-btn plus clickable" style="width:28px;height:28px;font-size:16px" onclick="updateCart(\${item.id}, 1); openCartSheet();">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        \`;
+    }
+    
+    if (subtotal === 0) {
+        closeCartSheet();
+        return;
+    }
+    
+    itemsContainer.innerHTML = html;
+    document.getElementById('sheetSubtotal').textContent = subtotal.toLocaleString() + " so'm";
+    document.getElementById('sheetTotal').textContent = (subtotal + 10000).toLocaleString() + " so'm";
+    
+    sheetOverlay.classList.add('visible');
+}
+
+function closeCartSheet() {
+    document.getElementById('cartSheetOverlay').classList.remove('visible');
 }
 
 function submitOrder() {
-    const t = cart.reduce((s,i) => s + i.price*i.qty, 0);
-    const items = cart.map(i => `${i.name} x${i.qty}`).join(', ');
-    tg.sendData(JSON.stringify({ action: "order", items, total: t }));
-    cart = []; updateBadge(); closeCart(); tg.close();
-}
-
-function doSearch(q) {
-    const d = document.getElementById('searchResults');
-    if (q.length < 2) { d.style.display = 'none'; return; }
-    const ql = q.toLowerCase();
-    const found = [];
-    stores.filter(s => s.name.toLowerCase().includes(ql)).forEach(s => found.push({ t: 'store', ...s }));
-    for (const [sid, prods] of Object.entries(allProducts)) {
-        prods.filter(p => p.name.toLowerCase().includes(ql)).forEach(p => found.push({ t: 'product', ...p, sid: +sid, sname: stores.find(s => s.id == sid)?.name }));
+    let total = 10000; // delivery
+    let itemsStr = [];
+    for (const key in cart) {
+        itemsStr.push(\`\${cart[key].name} x\${cart[key].qty}\`);
+        total += cart[key].price * cart[key].qty;
     }
-    d.innerHTML = found.length ? found.map(f => f.t === 'store' ? 
-        `<div class="search-item" onclick="openStore(${f.id});d.style.display='none';document.getElementById('searchInput').value='';"><span class="search-emoji">${f.emoji}</span><div><div class="search-name">${f.name}</div><div class="search-sub">🕐 ${f.time} · ⭐ ${f.rating}</div></div></div>` :
-        `<div class="search-item" onclick="openStore(${f.sid});d.style.display='none';document.getElementById('searchInput').value='';"><span class="search-emoji">${f.emoji}</span><div><div class="search-name">${f.name}</div><div class="search-sub">${f.sname} · ${f.price.toLocaleString()} so'm</div></div></div>`
-    ).join('') : '<div class="empty-text">Topilmadi</div>';
-    d.style.display = 'block';
+    tg.sendData(JSON.stringify({ action: "order", items: itemsStr.join(', '), total: total }));
+    cart = {};
+    updateCartUI();
+    closeCartSheet();
+    tg.close();
 }
 
-function renderProfile() {
-    const u = tg.initDataUnsafe?.user;
-    if (u) {
-        document.getElementById('profileName').textContent = u.first_name + (u.last_name ? ' ' + u.last_name : '');
-        document.getElementById('profileUsername').textContent = u.username ? '@' + u.username : '';
-        document.getElementById('profileId').textContent = 'ID: ' + u.id;
-        if (u.photo_url) {
-            document.getElementById('profileAvatar').innerHTML = `<img src="${u.photo_url}">`;
-            document.getElementById('headerAvatar').innerHTML = `<img src="${u.photo_url}">`;
+tg.MainButton.onClick(submitOrder);
+
+function showPage(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + pageId).classList.add('active');
+    
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    if (pageId === 'home') document.getElementById('navHome').classList.add('active');
+    if (pageId === 'profile') document.getElementById('navProfile').classList.add('active');
+    
+    document.getElementById('mainHeader').style.display = pageId === 'store' ? 'none' : 'flex';
+    window.scrollTo(0,0);
+}
+
+function loadProfile() {
+    const user = tg.initDataUnsafe?.user;
+    if (user) {
+        const name = user.first_name + (user.last_name ? ' ' + user.last_name : '');
+        document.getElementById('profileName').textContent = name;
+        
+        if (user.photo_url) {
+            const imgHtml = \`<img src="\${user.photo_url}">\`;
+            document.getElementById('profileAvatarBig').innerHTML = imgHtml;
+            document.getElementById('headerAvatar').innerHTML = imgHtml;
+        } else {
+            const initial = user.first_name ? user.first_name.charAt(0) : 'U';
+            document.getElementById('profileAvatarBig').textContent = initial;
+            document.getElementById('headerAvatar').textContent = initial;
         }
     }
 }
 
-document.addEventListener('click', e => {
-    if (!e.target.closest('#searchInput') && !e.target.closest('#searchResults')) {
-        document.getElementById('searchResults').style.display = 'none';
-    }
+// Category filter toggle animation
+document.querySelectorAll('.categories').forEach(catList => {
+    catList.addEventListener('click', (e) => {
+        if(e.target.classList.contains('cat-btn')) {
+            catList.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+        }
+    });
 });
 
-// INIT
-renderStores();
-document.getElementById('discountList').innerHTML = discounts.map(d => 
-    `<div class="discount-card"><div class="discount-img">${d.emoji}</div><div class="discount-body"><div class="discount-name">${d.name}</div><div class="discount-price">${d.price.toLocaleString()} so'm<span class="discount-old">${d.oldPrice.toLocaleString()}</span></div><span class="discount-badge">${d.badge}</span></div></div>`
-).join('');
-updateBadge();
-renderProfile();
+// Init
+renderHome();
+loadProfile();
 </script>
 </body>
 </html>
