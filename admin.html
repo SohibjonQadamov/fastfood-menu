@@ -2,175 +2,459 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚙️ Admin Panel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>⚙️ Admin Dashboard</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f0f1a; color: white; padding: 15px; min-height: 100vh; }
-        .header { text-align: center; padding: 20px; background: linear-gradient(135deg, #6c5ce7, #a855f7); border-radius: 15px; margin-bottom: 20px; }
-        .header h1 { font-size: 24px; }
-        .header p { font-size: 13px; opacity: 0.8; margin-top: 5px; }
-        .card { background: #1a1a2e; border-radius: 15px; padding: 20px; margin-bottom: 15px; }
-        .card h3 { color: #a855f7; margin-bottom: 15px; font-size: 18px; }
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; font-size: 13px; color: #aaa; margin-bottom: 5px; }
-        .input-group input, .input-group select { width: 100%; padding: 12px; background: #0f0f1a; border: 1px solid #333; border-radius: 10px; color: white; font-size: 15px; }
-        .input-group input:focus { border-color: #a855f7; outline: none; }
-        .btn { width: 100%; padding: 14px; background: #a855f7; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
-        .btn:active { background: #7c3aed; }
-        .btn-red { background: #e94560; }
-        .btn-red:active { background: #c73a52; }
-        .btn-green { background: #10b981; }
-        .btn-green:active { background: #059669; }
-        .product-list { display: flex; flex-direction: column; gap: 10px; }
-        .product-item { background: #0f0f1a; border-radius: 10px; padding: 12px; display: flex; align-items: center; gap: 12px; }
-        .product-item img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; }
-        .product-item-info { flex: 1; }
-        .product-item-name { font-weight: bold; font-size: 14px; }
-        .product-item-price { color: #10b981; font-size: 13px; }
-        .product-item-del { background: #e94560; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; }
-        .tab-bar { display: flex; gap: 10px; margin-bottom: 15px; }
-        .tab { flex: 1; padding: 12px; background: #1a1a2e; border: none; border-radius: 10px; color: white; font-size: 14px; cursor: pointer; text-align: center; }
-        .tab.active { background: #a855f7; }
-        .hidden { display: none; }
-        .message { padding: 12px; border-radius: 10px; margin-bottom: 15px; font-size: 14px; text-align: center; }
-        .message-success { background: #05966933; color: #10b981; }
-        .message-error { background: #e9456033; color: #e94560; }
+        :root {
+            --primary: #5E5CE6; /* iOS Indigo */
+            --primary-light: rgba(94, 92, 230, 0.15);
+            --success: #32D74B;
+            --danger: #FF453A;
+            --warning: #FF9F0A;
+            --bg: #000000;
+            --card: #1C1C1E;
+            --card-hover: #2C2C2E;
+            --text-main: #FFFFFF;
+            --text-muted: #EBEBF599; /* iOS Secondary Label */
+            --border: #38383A;
+            --radius-lg: 20px;
+            --radius-md: 14px;
+            --radius-sm: 10px;
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --transition: all 0.2s ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font); -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            padding: 20px 16px 80px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* HEADER */
+        .header {
+            margin-bottom: 24px;
+        }
+        .header-title { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4px; }
+        .header-subtitle { font-size: 15px; color: var(--text-muted); font-weight: 500; }
+
+        /* DASHBOARD STATS */
+        .stats-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;
+        }
+        .stat-card {
+            background: var(--card); border-radius: var(--radius-lg); padding: 16px;
+            border: 1px solid var(--border);
+        }
+        .stat-icon {
+            width: 36px; height: 36px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 12px;
+        }
+        .stat-icon.blue { background: rgba(10, 132, 255, 0.15); color: #0A84FF; }
+        .stat-icon.green { background: rgba(50, 215, 75, 0.15); color: #32D74B; }
+        .stat-icon.orange { background: rgba(255, 159, 10, 0.15); color: #FF9F0A; }
+        .stat-icon.purple { background: rgba(191, 90, 242, 0.15); color: #BF5AF2; }
+        
+        .stat-val { font-size: 24px; font-weight: 800; margin-bottom: 2px; }
+        .stat-label { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+
+        /* TABS */
+        .segmented-control {
+            background: rgba(118, 118, 128, 0.24); padding: 2px; border-radius: 9px;
+            display: flex; margin-bottom: 24px;
+        }
+        .seg-btn {
+            flex: 1; padding: 6px 0; border: none; background: transparent; color: var(--text-main);
+            font-size: 13px; font-weight: 600; border-radius: 7px; cursor: pointer; transition: var(--transition);
+        }
+        .seg-btn.active { background: #636366; box-shadow: 0 3px 8px rgba(0,0,0,0.12), 0 3px 1px rgba(0,0,0,0.04); }
+
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* LISTS (Products & Orders) */
+        .list-container {
+            background: var(--card); border-radius: var(--radius-lg); overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .list-item {
+            display: flex; align-items: center; gap: 12px; padding: 16px;
+            border-bottom: 1px solid var(--border); transition: var(--transition);
+        }
+        .list-item:last-child { border-bottom: none; }
+        .list-item:active { background: var(--card-hover); }
+        
+        .item-img {
+            width: 48px; height: 48px; border-radius: 12px; background: var(--bg);
+            display: flex; align-items: center; justify-content: center; font-size: 24px;
+        }
+        .item-info { flex: 1; }
+        .item-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+        .item-subtitle { font-size: 13px; color: var(--text-muted); }
+        
+        .badge {
+            padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase;
+        }
+        .badge.new { background: rgba(10, 132, 255, 0.15); color: #0A84FF; }
+        .badge.progress { background: rgba(255, 159, 10, 0.15); color: #FF9F0A; }
+        .badge.done { background: rgba(50, 215, 75, 0.15); color: #32D74B; }
+
+        /* ACTION BUTTONS */
+        .btn-icon {
+            width: 32px; height: 32px; border-radius: 50%; border: none;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--transition);
+        }
+        .btn-icon.edit { background: rgba(10, 132, 255, 0.15); color: #0A84FF; }
+        .btn-icon.delete { background: rgba(255, 69, 58, 0.15); color: #FF453A; }
+        .btn-icon:active { transform: scale(0.9); filter: brightness(1.2); }
+
+        /* FORM INPUTS */
+        .input-group { margin-bottom: 16px; }
+        .input-label { display: block; font-size: 13px; color: var(--text-muted); font-weight: 500; margin-bottom: 8px; margin-left: 4px; }
+        .input-field {
+            width: 100%; padding: 14px 16px; background: var(--card); border: 1px solid var(--border);
+            border-radius: var(--radius-md); color: white; font-size: 16px; transition: var(--transition);
+        }
+        .input-field:focus { outline: none; border-color: var(--primary); background: #242426; }
+        select.input-field { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23EBEBF599' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; }
+
+        .btn-primary {
+            width: 100%; padding: 16px; background: var(--primary); color: white;
+            border: none; border-radius: var(--radius-md); font-size: 16px; font-weight: 700;
+            cursor: pointer; transition: var(--transition); margin-top: 8px;
+        }
+        .btn-primary:active { transform: scale(0.98); opacity: 0.9; }
+
+        /* TOAST */
+        .toast {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: rgba(28, 28, 30, 0.95); backdrop-filter: blur(10px); border: 1px solid var(--border);
+            padding: 12px 24px; border-radius: 100px; color: white; font-size: 14px; font-weight: 500;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            z-index: 1000; display: flex; align-items: center; gap: 8px;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast-icon { color: var(--success); font-size: 18px; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>⚙️ Admin Panel</h1>
-        <p>Mahsulotlarni boshqarish</p>
+        <div class="header-title">Boshqaruv</div>
+        <div class="header-subtitle" id="adminName">Admin paneli</div>
     </div>
 
-    <div class="tab-bar">
-        <button class="tab active" onclick="showTab('list')">📋 Mahsulotlar</button>
-        <button class="tab" onclick="showTab('add')">➕ Qo'shish</button>
+    <!-- STATS -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon blue">📦</div>
+            <div class="stat-val">124</div>
+            <div class="stat-label">Jami buyurtmalar</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon green">💰</div>
+            <div class="stat-val">3.2M</div>
+            <div class="stat-label">Tushum (so'm)</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon orange">🍔</div>
+            <div class="stat-val" id="totalProductsCount">0</div>
+            <div class="stat-label">Faol mahsulotlar</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon purple">🚗</div>
+            <div class="stat-val">8</div>
+            <div class="stat-label">Kuryerlar</div>
+        </div>
     </div>
 
-    <!-- Mahsulotlar ro'yxati -->
-    <div id="tab-list">
-        <div class="card">
-            <h3>📋 Barcha mahsulotlar</h3>
-            <div class="product-list" id="productList">
-                <p style="color:#aaa;">Yuklanmoqda...</p>
+    <!-- TABS -->
+    <div class="segmented-control">
+        <button class="seg-btn" onclick="switchTab('store', this)">Do'konim</button>
+        <button class="seg-btn active" onclick="switchTab('products', this)">Menyu</button>
+        <button class="seg-btn" onclick="switchTab('add', this)">Qo'shish</button>
+        <button class="seg-btn" onclick="switchTab('orders', this)">Buyurtmalar</button>
+    </div>
+
+    <!-- TAB: STORE SETTINGS -->
+    <div id="tab-store" class="tab-content">
+        <div class="list-container" style="padding: 16px;">
+            <div class="input-group">
+                <label class="input-label">Do'kon nomi</label>
+                <input type="text" id="storeName" class="input-field" placeholder="Masalan: Evos">
+            </div>
+            <div class="input-group">
+                <label class="input-label">Do'kon turi</label>
+                <input type="text" id="storeType" class="input-field" placeholder="Masalan: Fast Food">
+            </div>
+            <div class="input-group">
+                <label class="input-label">Do'kon Emojisi</label>
+                <input type="text" id="storeEmoji" class="input-field" placeholder="Masalan: 🥙">
+            </div>
+            <button class="btn-primary" onclick="saveStore()">Saqlash</button>
+        </div>
+    </div>
+
+    <!-- TAB: PRODUCTS LIST -->
+    <div id="tab-products" class="tab-content active">
+        <div class="list-container" id="productList">
+            <!-- JS generates products here -->
+        </div>
+    </div>
+
+    <!-- TAB: ADD PRODUCT -->
+    <div id="tab-add" class="tab-content">
+        <div class="input-group">
+            <label class="input-label">Mahsulot nomi</label>
+            <input type="text" id="prodName" class="input-field" placeholder="Masalan: Double Burger">
+        </div>
+        <div class="input-group">
+            <label class="input-label">Narxi (so'm)</label>
+            <input type="number" id="prodPrice" class="input-field" placeholder="Masalan: 35000">
+        </div>
+        <div class="input-group">
+            <label class="input-label">Kategoriya</label>
+            <select id="prodCategory" class="input-field">
+                <option value="Burgerlar">🍔 Burgerlar</option>
+                <option value="Lavash">🥙 Lavash</option>
+                <option value="Pitsa">🍕 Pitsa</option>
+                <option value="Ichimliklar">🥤 Ichimliklar</option>
+                <option value="Sushi">🍣 Sushi</option>
+            </select>
+        </div>
+        
+        <!-- Discount Section -->
+        <div style="background: var(--card-hover); padding: 12px; border-radius: 12px; margin-bottom: 16px; border: 1px solid var(--border);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                <label class="input-label" style="margin: 0; color: white;">Aksiyaga qo'yish (Skidka)</label>
+                <input type="checkbox" id="isDiscount" onchange="toggleDiscountFields()" style="width: 20px; height: 20px; accent-color: var(--primary);">
+            </div>
+            
+            <div id="discountFields" style="display: none; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 12px;">
+                <div class="input-group">
+                    <label class="input-label">Yangi narxi (Skidka narxi)</label>
+                    <input type="number" id="prodNewPrice" class="input-field" placeholder="Masalan: 23000">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Nechta mahsulot qoldi?</label>
+                    <input type="number" id="prodQty" class="input-field" placeholder="Masalan: 50">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Qachongacha amal qiladi?</label>
+                    <input type="date" id="prodDate" class="input-field">
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-primary" onclick="addProduct()">Mahsulotni saqlash</button>
+    </div>
+
+    <!-- TAB: ORDERS (Mock) -->
+    <div id="tab-orders" class="tab-content">
+        <div class="list-container">
+            <div class="list-item">
+                <div class="item-img" style="font-size: 20px;">👤</div>
+                <div class="item-info">
+                    <div class="item-title">Sohibjon (#1024)</div>
+                    <div class="item-subtitle">1x Burger, 1x Cola • 30,000 so'm</div>
+                </div>
+                <div class="badge new">Yangi</div>
+            </div>
+            <div class="list-item">
+                <div class="item-img" style="font-size: 20px;">👤</div>
+                <div class="item-info">
+                    <div class="item-title">Alisher (#1023)</div>
+                    <div class="item-subtitle">2x Lavash • 56,000 so'm</div>
+                </div>
+                <div class="badge progress">Kuryerda</div>
+            </div>
+            <div class="list-item">
+                <div class="item-img" style="font-size: 20px;">👤</div>
+                <div class="item-info">
+                    <div class="item-title">Malika (#1022)</div>
+                    <div class="item-subtitle">1x Pitsa • 65,000 so'm</div>
+                </div>
+                <div class="badge done">Yetkazildi</div>
             </div>
         </div>
     </div>
 
-    <!-- Mahsulot qo'shish -->
-    <div id="tab-add" class="hidden">
-        <div class="card">
-            <h3>➕ Yangi mahsulot</h3>
-            <div class="input-group">
-                <label>Mahsulot nomi</label>
-                <input type="text" id="prodName" placeholder="Masalan: Lavash mol go'sht">
-            </div>
-            <div class="input-group">
-                <label>Narxi (so'm)</label>
-                <input type="number" id="prodPrice" placeholder="28000">
-            </div>
-            <div class="input-group">
-                <label>Kategoriya</label>
-                <select id="prodCategory">
-                    <option value="lavash">🔥 Lavash</option>
-                    <option value="burger">🍔 Burger</option>
-                    <option value="hotdog">🌭 Hot-Dog</option>
-                    <option value="ichimlik">🥤 Ichimlik</option>
-                    <option value="gazak">🍟 Gazak</option>
-                    <option value="shirinlik">🍰 Shirinlik</option>
-                </select>
-            </div>
-            <div class="input-group">
-                <label>Rasm (ixtiyoriy)</label>
-                <input type="file" id="prodImage" accept="image/*">
-            </div>
-            <div id="messageBox"></div>
-            <button class="btn" onclick="addProduct()">✅ Qo'shish</button>
-        </div>
+    <!-- TOAST NOTIFICATION -->
+    <div class="toast" id="toast">
+        <span class="toast-icon">✓</span>
+        <span id="toastMsg">Saqlandi</span>
     </div>
 
-    <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
         
-        // Default mahsulotlar
-        let products = [
-            { id: 1, name: "Lavash mol go'sht", price: 28000, emoji: "🥙", category: "lavash" },
-            { id: 2, name: "Gamburger", price: 22000, emoji: "🍔", category: "burger" },
-            { id: 3, name: "Cola 0.5L", price: 8000, emoji: "🥤", category: "ichimlik" },
-        ];
+        let adminId = 123456; // Fallback
+        if (tg.initDataUnsafe?.user) {
+            adminId = tg.initDataUnsafe.user.id;
+            document.getElementById('adminName').textContent = "Admin: " + tg.initDataUnsafe.user.first_name;
+        }
 
-        function showTab(tab) {
-            document.getElementById('tab-list').classList.add('hidden');
-            document.getElementById('tab-add').classList.add('hidden');
-            document.getElementById(`tab-${tab}`).classList.remove('hidden');
+        let products = [];
+        let storeInfo = null;
+        
+        const reqHeaders = { 'Bypass-Tunnel-Reminder': 'true', 'Content-Type': 'application/json' };
+
+        async function loadAdminData() {
+            try {
+                const res = await fetch(`/api/admin_data?admin_id=${adminId}`, { headers: reqHeaders });
+                const data = await res.json();
+                
+                if (data.store) {
+                    storeInfo = data.store;
+                    document.getElementById('storeName').value = storeInfo.name;
+                    document.getElementById('storeType').value = storeInfo.type;
+                    document.getElementById('storeEmoji').value = storeInfo.emoji;
+                }
+                
+                products = data.products || [];
+                renderProducts();
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
             
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            if (tab === 'list') renderProducts();
+            document.getElementById('tab-' + tabId).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        function toggleDiscountFields() {
+            const isDiscount = document.getElementById('isDiscount').checked;
+            document.getElementById('discountFields').style.display = isDiscount ? 'block' : 'none';
         }
 
         function renderProducts() {
+            document.getElementById('totalProductsCount').textContent = products.length;
+            
             const container = document.getElementById('productList');
             if (products.length === 0) {
-                container.innerHTML = '<p style="color:#aaa;">Hozircha mahsulotlar yo\'q</p>';
+                container.innerHTML = '<div style="padding: 30px; text-align: center; color: var(--text-muted);">Mahsulotlar yo\'q. "Do\'konim" da do\'kon yaratib, so\'ng mahsulot qo\'shing.</div>';
                 return;
             }
-            container.innerHTML = products.map(p => `
-                <div class="product-item">
-                    <div style="width:50px;height:50px;background:#1a1a2e;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:25px;">${p.emoji}</div>
-                    <div class="product-item-info">
-                        <div class="product-item-name">${p.name}</div>
-                        <div class="product-item-price">${p.price.toLocaleString()} so'm | ${p.category}</div>
+            
+            container.innerHTML = products.map(p => {
+                let discountBadge = '';
+                let priceText = `${p.price.toLocaleString()} so'm`;
+                
+                if (p.old_price && p.discount_qty > 0) {
+                    const discountPercent = Math.round(100 - (p.price / p.old_price * 100));
+                    discountBadge = `<span style="color: #FF453A; font-weight: bold; margin-left: 6px;">-${discountPercent}%</span>`;
+                    priceText = `<span style="text-decoration: line-through; color: var(--text-muted); font-size: 11px;">${p.old_price.toLocaleString()}</span> ${p.price.toLocaleString()} so'm`;
+                }
+                
+                return `
+                <div class="list-item">
+                    <div class="item-img">${p.emoji || '🍔'}</div>
+                    <div class="item-info">
+                        <div class="item-title">${p.name} ${discountBadge}</div>
+                        <div class="item-subtitle">${priceText} • ${p.cat}</div>
+                        ${p.discount_qty > 0 ? `<div style="font-size:11px; color:#32D74B; margin-top:2px;">Qoldi: ${p.discount_qty} ta • ${p.discount_end || ''}gacha</div>` : ''}
                     </div>
-                    <button class="product-item-del" onclick="deleteProduct(${p.id})">🗑</button>
+                    <button class="btn-icon delete" onclick="deleteProduct(${p.id})">🗑</button>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
-        function addProduct() {
+        async function saveStore() {
+            const name = document.getElementById('storeName').value.trim();
+            const type = document.getElementById('storeType').value.trim();
+            const emoji = document.getElementById('storeEmoji').value.trim() || '🏪';
+            
+            if (!name) { showToast("Do'kon nomini kiriting!", false); return; }
+            
+            await fetch('/api/store', {
+                method: 'POST', headers: reqHeaders,
+                body: JSON.stringify({ admin_id: adminId, name, type: type, emoji })
+            });
+            showToast("Do'kon saqlandi!");
+            loadAdminData();
+        }
+
+        async function addProduct() {
+            if (!storeInfo) { showToast("Avval Do'konim bo'limida do'kon yarating!", false); return; }
+            
             const name = document.getElementById('prodName').value.trim();
-            const price = parseInt(document.getElementById('prodPrice').value);
-            const category = document.getElementById('prodCategory').value;
+            let price = parseInt(document.getElementById('prodPrice').value);
+            const cat = document.getElementById('prodCategory').value;
+            const isDiscount = document.getElementById('isDiscount').checked;
             
             if (!name || !price) {
-                showMessage('Iltimos, barcha maydonlarni to\'ldiring!', 'error');
+                showToast("Nomi va narxini kiriting!", false);
                 return;
             }
             
-            const emojiMap = { 'lavash': '🥙', 'burger': '🍔', 'hotdog': '🌭', 'ichimlik': '🥤', 'gazak': '🍟', 'shirinlik': '🍰' };
-            const emoji = emojiMap[category] || '🍔';
+            const emojiMap = { 'Burgerlar': '🍔', 'Lavash': '🥙', 'Pitsa': '🍕', 'Ichimliklar': '🥤', 'Sushi': '🍣' };
+            const emoji = emojiMap[cat] || '🍔';
             
-            const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
-            products.push({ id: newId, name, price, emoji, category });
+            let old_price = null, discount_qty = null, discount_end = null;
+            if (isDiscount) {
+                const newPrice = parseInt(document.getElementById('prodNewPrice').value);
+                if (newPrice && newPrice < price) {
+                    old_price = price;
+                    price = newPrice;
+                }
+                discount_qty = parseInt(document.getElementById('prodQty').value) || 0;
+                discount_end = document.getElementById('prodDate').value;
+            }
+            
+            await fetch('/api/product', {
+                method: 'POST', headers: reqHeaders,
+                body: JSON.stringify({
+                    admin_id: adminId,
+                    name, price, desc: "", emoji, cat,
+                    old_price, discount_qty, discount_end
+                })
+            });
             
             document.getElementById('prodName').value = '';
             document.getElementById('prodPrice').value = '';
-            showMessage(`✅ ${emoji} ${name} qo'shildi!`, 'success');
-            renderProducts();
+            if (isDiscount) {
+                document.getElementById('prodNewPrice').value = '';
+                document.getElementById('prodQty').value = '';
+                document.getElementById('prodDate').value = '';
+            }
+            
+            showToast("Mahsulot qo'shildi!");
+            loadAdminData();
+            setTimeout(() => switchTab('products', document.querySelectorAll('.seg-btn')[1]), 800);
         }
 
-        function deleteProduct(id) {
-            if (confirm('Haqiqatan ham o\'chirmoqchimisiz?')) {
-                products = products.filter(p => p.id !== id);
-                renderProducts();
-                showMessage('🗑 O\'chirildi', 'success');
+        async function deleteProduct(id) {
+            if (confirm("Rostdan ham o'chirmoqchimisiz?")) {
+                await fetch('/api/delete_product', {
+                    method: 'POST', headers: reqHeaders,
+                    body: JSON.stringify({ admin_id: adminId, id })
+                });
+                loadAdminData();
+                showToast("O'chirildi");
             }
         }
 
-        function showMessage(text, type) {
-            const box = document.getElementById('messageBox');
-            box.innerHTML = `<div class="message message-${type}">${text}</div>`;
-            setTimeout(() => box.innerHTML = '', 3000);
+        function showToast(msg, isSuccess = true) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            document.querySelector('.toast-icon').textContent = isSuccess ? '✓' : '⚠️';
+            document.querySelector('.toast-icon').style.color = isSuccess ? 'var(--success)' : 'var(--warning)';
+            
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
         }
 
-        // Boshlang'ich yuklash
-        renderProducts();
+        // Init
+        loadAdminData();
     </script>
 </body>
 </html>
