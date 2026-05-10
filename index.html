@@ -413,9 +413,11 @@
         <div class="section-title">Tavsiya etamiz</div>
         <a href="#" class="section-link">Barchasi</a>
     </div>
-    <div class="grid-container" id="storesList">
+    <div class="grid-container" id="storesList" style="min-height: 150px;">
         <!-- JS generates stores here -->
     </div>
+    
+    <div id="noStoresMsg" style="display: none; text-align: center; padding: 20px; color: var(--text-muted);">Hech narsa topilmadi</div>
 
     <!-- Popular Items -->
     <div class="section-header">
@@ -423,6 +425,46 @@
     </div>
     <div class="grid-container" id="popularItems" style="padding-bottom: 40px;">
         <!-- JS generates popular items -->
+    </div>
+</div>
+
+<!-- PAGE: FAVORITES -->
+<div class="page" id="page-favorites">
+    <div class="section-header" style="padding-top: 16px;">
+        <div class="section-title">Sevimlilar ❤️</div>
+    </div>
+    <div class="grid-container" id="favoritesList" style="padding-bottom: 40px; min-height: 200px;">
+        <!-- JS generates favorites -->
+    </div>
+    <div id="noFavsMsg" style="display: none; text-align: center; padding: 40px 20px; color: var(--text-muted);">Sizda sevimli restoranlar yo'q</div>
+</div>
+
+<!-- PAGE: ORDERS -->
+<div class="page" id="page-orders">
+    <div class="section-header" style="padding-top: 16px;">
+        <div class="section-title">Mening buyurtmalarim 📦</div>
+    </div>
+    <div style="padding: 0 20px 40px; display: flex; flex-direction: column; gap: 16px;" id="ordersList">
+        <!-- Mock Orders -->
+        <div class="store-info-card" style="margin: 0;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="font-weight: 700;">Buyurtma #1024</span>
+                <span style="color: var(--success); font-weight: 600;">Yetkazildi</span>
+            </div>
+            <div style="font-size: 14px; color: var(--text-muted); margin-bottom: 12px;">Evos • 12 May, 14:30</div>
+            <div style="font-size: 15px;">Lavash Standart x2, Coca-Cola x1</div>
+            <div style="margin-top: 12px; font-weight: 700; font-size: 16px;">64 000 so'm</div>
+        </div>
+        
+        <div class="store-info-card" style="margin: 0;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="font-weight: 700;">Buyurtma #985</span>
+                <span style="color: var(--text-muted); font-weight: 600;">Bekor qilingan</span>
+            </div>
+            <div style="font-size: 14px; color: var(--text-muted); margin-bottom: 12px;">KFC • 01 May, 19:15</div>
+            <div style="font-size: 15px;">Burger Combo x1</div>
+            <div style="margin-top: 12px; font-weight: 700; font-size: 16px;">35 000 so'm</div>
+        </div>
     </div>
 </div>
 
@@ -503,19 +545,19 @@
 
 <!-- BOTTOM NAVIGATION -->
 <div class="bottom-nav">
-    <button class="nav-item clickable active" id="navHome" onclick="showPage('home')">
+    <button class="nav-item clickable active" id="nav-home" onclick="showPage('home')">
         <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>
         Bosh sahifa
     </button>
-    <button class="nav-item clickable">
+    <button class="nav-item clickable" id="nav-favorites" onclick="showPage('favorites')">
         <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div>
         Sevimlilar
     </button>
-    <button class="nav-item clickable">
+    <button class="nav-item clickable" id="nav-orders" onclick="showPage('orders')">
         <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
         Buyurtmalar
     </button>
-    <button class="nav-item clickable" id="navProfile" onclick="showPage('profile')">
+    <button class="nav-item clickable" id="nav-profile" onclick="showPage('profile')">
         <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
         Profil
     </button>
@@ -566,9 +608,9 @@ let cart = {};
 let currentStoreId = null;
 
 // Apply theme matching Telegram (iOS styles will adapt if variables match)
-const bgC = tg.themeParams.bg_color;
-const secBgC = tg.themeParams.secondary_bg_color;
-const txtC = tg.themeParams.text_color;
+const bgC = tg.themeParams?.bg_color;
+const secBgC = tg.themeParams?.secondary_bg_color;
+const txtC = tg.themeParams?.text_color;
 if (bgC) {
     document.documentElement.style.setProperty('--bg', bgC);
     document.documentElement.style.setProperty('--nav-bg', bgC + 'D9'); // Add alpha for blur
@@ -576,36 +618,67 @@ if (bgC) {
 if (secBgC) document.documentElement.style.setProperty('--card', secBgC);
 if (txtC) document.documentElement.style.setProperty('--text-main', txtC);
 
-// Mock Data
-const stores = [
+// Data variables
+let stores = [
     { id: 1, name: "Evos", emoji: "🥙", time: "15-20", rating: "4.8", type: "Fast Food", bg: "linear-gradient(135deg, #FF9A9E, #FECFEF)" },
-    { id: 2, name: "Oqtepa Lavash", emoji: "🌯", time: "20-25", rating: "4.6", type: "Fast Food", bg: "linear-gradient(135deg, #a18cd1, #fbc2eb)" },
-    { id: 3, name: "Bellissimo Pizza", emoji: "🍕", time: "30-40", rating: "4.9", type: "Pitseriya", bg: "linear-gradient(135deg, #f6d365, #fda085)" },
-    { id: 4, name: "KFC", emoji: "🍗", time: "15-25", rating: "4.7", type: "Tovuq", bg: "linear-gradient(135deg, #ff0844, #ffb199)" }
+    { id: 2, name: "Oqtepa Lavash", emoji: "🌯", time: "20-25", rating: "4.6", type: "Lavash", bg: "linear-gradient(135deg, #a18cd1, #fbc2eb)" },
+    { id: 3, name: "Bellissimo Pizza", emoji: "🍕", time: "30-40", rating: "4.9", type: "Pitsa", bg: "linear-gradient(135deg, #f6d365, #fda085)" },
+    { id: 4, name: "KFC", emoji: "🍗", time: "15-25", rating: "4.7", type: "Burgerlar", bg: "linear-gradient(135deg, #ff0844, #ffb199)" },
+    { id: 5, name: "Yaponamama", emoji: "🍣", time: "40-50", rating: "4.8", type: "Sushi", bg: "linear-gradient(135deg, #84fab0, #8fd3f4)" },
+    { id: 6, name: "Max Way", emoji: "🍔", time: "10-20", rating: "4.5", type: "Burgerlar", bg: "linear-gradient(135deg, #e0c3fc, #8ec5fc)" }
 ];
 
-const promoItemsData = [
-    { id: 201, name: "Burger Combo", price: 35000, oldPrice: 45000, discount: "-20%", img: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=300", emoji: "🍔", desc: "Maxsus burger va ichimlik", cat: "Burger" },
-    { id: 202, name: "Pitsa Set", price: 55000, oldPrice: 70000, discount: "-21%", img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=300", emoji: "🍕", desc: "Katta pitsa va fri", cat: "Pitsa" },
-    { id: 203, name: "Hot Dog Mega", price: 18000, oldPrice: 22000, discount: "-18%", img: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=300", emoji: "🌭", desc: "Ikki karra sosiskali hot-dog", cat: "Hot Dog" }
-];
-
-const menuItems = {
+let menuItems = {
     1: [
-        ...promoItemsData,
-        { id: 101, name: "Lavash Standart", price: 28000, desc: "Mol go'shti, chips, bodring, pomidor, sous", emoji: "🥙", cat: "Lavash" },
-        { id: 102, name: "Lavash Tovuq", price: 26000, desc: "Tovuq filesi, chips, pishloq, maxsus sous", emoji: "🌯", cat: "Lavash" },
-        { id: 103, name: "Gamburger", price: 22000, desc: "Mol go'shti kotleti, salat bargi, sous", emoji: "🍔", cat: "Burger" },
-        { id: 104, name: "Coca-Cola 0.5L", price: 8000, desc: "Muzdek ichimlik", emoji: "🥤", cat: "Ichimlik" }
+        { id: 101, name: "Lavash Standart", price: 28000, desc: "Mol go'shti, chips, bodring, pomidor, maxsus sous", emoji: "🥙", cat: "Lavash" },
+        { id: 102, name: "Lavash Tovuq", price: 26000, desc: "Tovuq filesi, chips, pishloq, sous", emoji: "🌯", cat: "Lavash" },
+        { id: 103, name: "Gamburger", price: 22000, desc: "Mol go'shti kotleti, salat bargi, pomidor", emoji: "🍔", cat: "Burger" },
+        { id: 104, name: "Coca-Cola 0.5L", price: 8000, desc: "Muzdek salqin ichimlik", emoji: "🥤", cat: "Ichimliklar" },
+        { id: 105, name: "Klab Sendvich", price: 32000, desc: "Tovuq go'shti, tuxum, pishloq va fri", emoji: "🥪", cat: "Fast Food" }
+    ],
+    2: [
+        { id: 201, name: "Oqtepa Lavash", price: 29000, desc: "Katta va to'yimli lavash", emoji: "🌯", cat: "Lavash" },
+        { id: 202, name: "Chizburger", price: 24000, desc: "Eritilgan pishloqli ajoyib burger", emoji: "🍔", cat: "Burger" },
+        { id: 203, name: "Fanta 0.5L", price: 8000, desc: "Apelsin ta'mli ichimlik", emoji: "🧃", cat: "Ichimliklar" }
+    ],
+    3: [
+        { id: 301, name: "Peperoni Pitsa", price: 75000, desc: "Mazzali kolbasa va motsarella pishlog'i", emoji: "🍕", cat: "Pitsa" },
+        { id: 302, name: "Margarita Pitsa", price: 65000, desc: "Klassik italyan pitsasi, pomidor bilan", emoji: "🍕", cat: "Pitsa" },
+        { id: 303, name: "Chicken Pitsa", price: 70000, desc: "Tovuq filesi, qo'ziqorin va pishloq", emoji: "🍕", cat: "Pitsa" },
+        { id: 304, name: "Sok 1L", price: 15000, desc: "Tabiiy meva sharbati", emoji: "🍹", cat: "Ichimliklar" }
     ]
 };
+
+let promoItemsData = [
+    { id: 1001, name: "Burger Combo", price: 35000, oldPrice: 45000, discount: "-20%", img: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=300", emoji: "🍔", desc: "Maxsus burger va ichimlik", cat: "Burgerlar", store_id: 1 },
+    { id: 1002, name: "Pitsa Set", price: 55000, oldPrice: 70000, discount: "-21%", img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=300", emoji: "🍕", desc: "Katta pitsa va fri", cat: "Pitsa", store_id: 3 },
+    { id: 1003, name: "Hot Dog Mega", price: 18000, oldPrice: 22000, discount: "-18%", img: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=300", emoji: "🌭", desc: "Ikki karra sosiskali hot-dog", cat: "Fast Food", store_id: 1 }
+];
+
+let currentHomeCategory = "Hammasi";
+let currentSearchQuery = "";
+let currentStoreCategory = "Barchasi";
+
+// Favorites logic
+let favorites = JSON.parse(localStorage.getItem('fastfood_favs') || '[]');
+function toggleFav(id) {
+    if (favorites.includes(id)) {
+        favorites = favorites.filter(x => x !== id);
+    } else {
+        favorites.push(id);
+    }
+    localStorage.setItem('fastfood_favs', JSON.stringify(favorites));
+    renderHome();
+    renderFavorites();
+}
 
 // Render Functions
 function renderHome() {
     const promoHtml = promoItemsData.map(p => {
         const q = cart[p.id]?.qty || 0;
+        const storeId = p.store_id || 1;
         return `
-            <div class="story-card clickable" onclick="openStore(1)">
+            <div class="story-card clickable" onclick="openStore(${storeId})">
                 <div class="story-bg" style="background-image: url('${p.img}');">
                     <div class="story-badge">${p.discount}</div>
                 </div>
@@ -613,17 +686,18 @@ function renderHome() {
                     <div>
                         <div class="story-title">${p.name}</div>
                         <span class="story-old-price">${p.oldPrice.toLocaleString()} so'm</span>
+                        <div style="font-size: 11px; margin-top: 2px; color: #32D74B; font-weight: 600;">Qoldi: ${p.discount_qty} ta • ${p.discount_end || ''}gacha</div>
                     </div>
                     <div class="story-bottom">
                         <div class="story-price">${p.price.toLocaleString()}</div>
                         ${q > 0 ? `
                         <div class="promo-qty-control" onclick="event.stopPropagation()">
-                            <button class="promo-qty-btn clickable" onclick="updateCart(${p.id}, -1)">−</button>
+                            <button class="promo-qty-btn clickable" onclick="updateCart(${p.id}, -1, ${storeId})">−</button>
                             <span class="promo-qty-val">${q}</span>
-                            <button class="promo-qty-btn plus clickable" onclick="updateCart(${p.id}, 1)">+</button>
+                            <button class="promo-qty-btn plus clickable" onclick="updateCart(${p.id}, 1, ${storeId})">+</button>
                         </div>
                         ` : `
-                        <button class="promo-add-btn clickable" onclick="event.stopPropagation(); updateCart(${p.id}, 1)">+</button>
+                        <button class="promo-add-btn clickable" onclick="event.stopPropagation(); updateCart(${p.id}, 1, ${storeId})">+</button>
                         `}
                     </div>
                 </div>
@@ -632,10 +706,19 @@ function renderHome() {
     }).join('');
     document.getElementById('promoItems').innerHTML = promoHtml;
 
-    const storesHtml = stores.map(s => `
+    // Filter Stores based on Category and Search
+    let filteredStores = stores.filter(s => {
+        const matchesCat = currentHomeCategory === "Hammasi" || s.type.includes(currentHomeCategory) || (currentHomeCategory.includes("Burger") && s.name.includes("Evos")); // basic mock filter logic
+        const matchesSearch = s.name.toLowerCase().includes(currentSearchQuery) || s.type.toLowerCase().includes(currentSearchQuery);
+        return matchesCat && matchesSearch;
+    });
+
+    const storesHtml = filteredStores.map(s => {
+        const isFav = favorites.includes(s.id);
+        return `
         <div class="item-card clickable" onclick="openStore(${s.id})">
             <div class="item-img-wrap" style="background: ${s.bg}">${s.emoji}
-                <div class="item-fav" onclick="event.stopPropagation(); this.classList.toggle('active')">
+                <div class="item-fav ${isFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleFav(${s.id})">
                     <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                 </div>
             </div>
@@ -651,17 +734,24 @@ function renderHome() {
                 </div>
             </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
+    
     document.getElementById('storesList').innerHTML = storesHtml;
+    document.getElementById('noStoresMsg').style.display = filteredStores.length === 0 ? 'block' : 'none';
 
-    const popHtml = menuItems[1].filter(i => i.cat !== undefined).slice(0, 2).map(p => `
-        <div class="item-card clickable" onclick="openStore(1)">
-            <div class="item-img-wrap">${p.emoji}</div>
+    let allItemsList = [];
+    if (menuItems[1]) allItemsList = [...menuItems[1]];
+    else if (Object.keys(menuItems).length > 0) allItemsList = [...menuItems[Object.keys(menuItems)[0]]];
+    
+    const popHtml = allItemsList.filter(i => i.cat !== undefined).slice(0, 2).map(p => `
+        <div class="item-card clickable" onclick="openStore(${p.store_id || 1})">
+            <div class="item-img-wrap">${p.emoji || '🍔'}</div>
             <div class="item-info">
                 <div class="item-title">${p.name}</div>
                 <div class="item-bottom" style="margin-top: 8px;">
                     <div class="item-price">${p.price.toLocaleString()} so'm</div>
-                    <button class="add-btn clickable" onclick="event.stopPropagation(); updateCart(${p.id}, 1)">+</button>
+                    <button class="add-btn clickable" onclick="event.stopPropagation(); updateCart(${p.id}, 1, ${p.store_id || 1})">+</button>
                 </div>
             </div>
         </div>
@@ -684,8 +774,40 @@ function openStore(id) {
     showPage('store');
 }
 
+function renderFavorites() {
+    const favStores = stores.filter(s => favorites.includes(s.id));
+    const favHtml = favStores.map(s => `
+        <div class="item-card clickable" onclick="openStore(${s.id})">
+            <div class="item-img-wrap" style="background: ${s.bg}">${s.emoji}
+                <div class="item-fav active" onclick="event.stopPropagation(); toggleFav(${s.id})">
+                    <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                </div>
+            </div>
+            <div class="item-info">
+                <div class="item-title">${s.name}</div>
+                <div class="item-meta">
+                    <span class="item-rating"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg> ${s.rating}</span>
+                    <span>•</span>
+                    <span>${s.time} min</span>
+                </div>
+                <div class="item-bottom">
+                    <span style="font-size: 13px; color: var(--text-muted); font-weight: 500;">${s.type}</span>
+                </div>
+            </div>
+        </div>
+    `).join('');
+    document.getElementById('favoritesList').innerHTML = favHtml;
+    document.getElementById('noFavsMsg').style.display = favStores.length === 0 ? 'block' : 'none';
+}
+
 function renderStoreMenu(storeId) {
-    const items = menuItems[storeId] || menuItems[1];
+    let items = menuItems[storeId] || menuItems[1];
+    
+    // Filter by store category
+    if (currentStoreCategory !== "Barchasi") {
+        items = items.filter(i => i.cat && i.cat.includes(currentStoreCategory) || i.cat === currentStoreCategory);
+    }
+
     const html = items.map(p => {
         const q = cart[p.id]?.qty || 0;
         return \`
@@ -715,11 +837,21 @@ function renderStoreMenu(storeId) {
     document.getElementById('storeMenu').innerHTML = html;
 }
 
-function updateCart(itemId, delta) {
-    const item = menuItems[currentStoreId || 1].find(x => x.id === itemId);
+function updateCart(itemId, delta, forceStoreId = null) {
+    const sId = forceStoreId || currentStoreId || 1;
+    let item = null;
+    
+    // Find item
+    if (menuItems[sId]) {
+        item = menuItems[sId].find(x => x.id === itemId);
+    }
+    if (!item) {
+        item = promoItemsData.find(x => x.id === itemId);
+    }
+    
     if (!item) return;
 
-    if (!cart[itemId]) cart[itemId] = { ...item, qty: 0 };
+    if (!cart[itemId]) cart[itemId] = { ...item, qty: 0, store_id: sId };
     cart[itemId].qty += delta;
     
     if (cart[itemId].qty <= 0) delete cart[itemId];
@@ -808,11 +940,13 @@ function closeCartSheet() {
 function submitOrder() {
     let total = 10000; // delivery
     let itemsStr = [];
+    let storeIdForOrder = null;
     for (const key in cart) {
-        itemsStr.push(\`\${cart[key].name} x\${cart[key].qty}\`);
+        itemsStr.push(`${cart[key].name} x${cart[key].qty}`);
         total += cart[key].price * cart[key].qty;
+        if (!storeIdForOrder) storeIdForOrder = cart[key].store_id;
     }
-    tg.sendData(JSON.stringify({ action: "order", items: itemsStr.join(', '), total: total }));
+    tg.sendData(JSON.stringify({ action: "order", items: itemsStr.join(', '), total: total, store_id: storeIdForOrder }));
     cart = {};
     updateCartUI();
     closeCartSheet();
@@ -826,10 +960,15 @@ function showPage(pageId) {
     document.getElementById('page-' + pageId).classList.add('active');
     
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    if (pageId === 'home') document.getElementById('navHome').classList.add('active');
-    if (pageId === 'profile') document.getElementById('navProfile').classList.add('active');
+    const navBtn = document.getElementById('nav-' + pageId);
+    if (navBtn) navBtn.classList.add('active');
     
     document.getElementById('mainHeader').style.display = pageId === 'store' ? 'none' : 'flex';
+    
+    if (pageId === 'favorites') {
+        renderFavorites();
+    }
+    
     window.scrollTo(0,0);
 }
 
@@ -851,19 +990,93 @@ function loadProfile() {
     }
 }
 
-// Category filter toggle animation
-document.querySelectorAll('.categories').forEach(catList => {
-    catList.addEventListener('click', (e) => {
-        if(e.target.classList.contains('cat-btn')) {
-            catList.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
-            e.target.classList.add('active');
-        }
-    });
+// Category filter toggle animation (Home)
+document.querySelector('#page-home .categories').addEventListener('click', (e) => {
+    if(e.target.classList.contains('cat-btn')) {
+        e.currentTarget.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+        e.target.classList.add('active');
+        currentHomeCategory = e.target.textContent.replace(/[🍔🥙🍕🍣]/g, '').trim();
+        renderHome();
+    }
 });
 
+// Category filter toggle animation (Store)
+document.querySelector('#storeCategories').addEventListener('click', (e) => {
+    if(e.target.classList.contains('cat-btn')) {
+        e.currentTarget.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+        e.target.classList.add('active');
+        currentStoreCategory = e.target.textContent.trim();
+        renderStoreMenu(currentStoreId);
+    }
+});
+
+// Search functionality
+document.getElementById('searchInput').addEventListener('input', (e) => {
+    currentSearchQuery = e.target.value.toLowerCase().trim();
+    renderHome();
+});
+
+async function initApp() {
+    try {
+        const res = await fetch('/api/data', {
+            headers: {
+                'Bypass-Tunnel-Reminder': 'true'
+            }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            if (data.stores && data.stores.length > 0) {
+                stores = data.stores;
+                menuItems = data.menuItems || {};
+                
+                promoItemsData = [];
+                const imgs = [
+                    "https://images.unsplash.com/photo-1550547660-d9450f859349?w=300",
+                    "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=300",
+                    "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=300"
+                ];
+
+                for (let sid in menuItems) {
+                    menuItems[sid].forEach(i => {
+                        i.store_id = sid;
+                        if (i.old_price && i.discount_qty > 0) {
+                            let validDate = true;
+                            if (i.discount_end) {
+                                const endDate = new Date(i.discount_end);
+                                const today = new Date();
+                                today.setHours(0,0,0,0);
+                                if (endDate < today) validDate = false;
+                            }
+                            if (validDate) {
+                                const discountPercent = Math.round(100 - (i.price / i.old_price * 100));
+                                promoItemsData.push({
+                                    id: i.id,
+                                    name: i.name,
+                                    price: i.price,
+                                    oldPrice: i.old_price,
+                                    discount: `-${discountPercent}%`,
+                                    img: imgs[promoItemsData.length % imgs.length],
+                                    emoji: i.emoji,
+                                    store_id: i.store_id,
+                                    discount_qty: i.discount_qty,
+                                    discount_end: i.discount_end || 'Muddatsiz'
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+        }
+    } catch (e) {
+        console.log("Using local mock data fallback");
+    }
+    renderHome();
+    renderFavorites();
+    loadProfile();
+}
+
 // Init
-renderHome();
-loadProfile();
+initApp();
 </script>
 </body>
 </html>
